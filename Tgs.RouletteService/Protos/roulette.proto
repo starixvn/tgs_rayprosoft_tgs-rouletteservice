@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option csharp_namespace = "Tgs.RouletteServices.Protos";
+
+import "phoenix/protobuf/date.proto";
+import "phoenix/protobuf/guid.proto";
+
+message RouletteRequest {
+	string player_code = 1;
+	phoenix.protobuf.GuidValue promotion_id = 2;
+	phoenix.protobuf.DateValue date = 3;
+}
+
+message RouletteResponse {
+	phoenix.protobuf.GuidValue id = 1;
+	int32 item_index = 2;
+}

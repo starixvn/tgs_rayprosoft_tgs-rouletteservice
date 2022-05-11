@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32421.90
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.RouletteService", "Tgs.RouletteService\Tgs.RouletteService.csproj", "{C7678C28-0B3A-4C44-8A37-558A516805A6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RouletteSignIn.Core", "RouletteSignIn.Core\RouletteSignIn.Core.csproj", "{D5DC85B2-9679-43A5-872C-420130837EB6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DCD943C9-801D-4FC5-BD64-C4FC81B324E5}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		nuget.config = nuget.config
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RouletteSignIn.Core.UnitTests", "RouletteSignIn.Core.UnitTests\RouletteSignIn.Core.UnitTests.csproj", "{737034D6-647F-4D09-AFA6-C0A86087CBDB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RouletteSignInRepositories", "RouletteSignInRepositories\RouletteSignInRepositories.csproj", "{1C802E5B-6B34-48DC-84CC-B4F0DDD7E698}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RouletteSignInClient", "RouletteSignInClient\RouletteSignInClient.csproj", "{8884F2A8-73F2-4F2E-9E84-5359EC7B0B7C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RouletteSignIn.IntegrationTests", "RouletteSignIn.IntegrationTests\RouletteSignIn.IntegrationTests.csproj", "{8E1310D5-772B-4C48-B727-4E82D80F7204}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C7678C28-0B3A-4C44-8A37-558A516805A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7678C28-0B3A-4C44-8A37-558A516805A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7678C28-0B3A-4C44-8A37-558A516805A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7678C28-0B3A-4C44-8A37-558A516805A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5DC85B2-9679-43A5-872C-420130837EB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5DC85B2-9679-43A5-872C-420130837EB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5DC85B2-9679-43A5-872C-420130837EB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5DC85B2-9679-43A5-872C-420130837EB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{737034D6-647F-4D09-AFA6-C0A86087CBDB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{737034D6-647F-4D09-AFA6-C0A86087CBDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{737034D6-647F-4D09-AFA6-C0A86087CBDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{737034D6-647F-4D09-AFA6-C0A86087CBDB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C802E5B-6B34-48DC-84CC-B4F0DDD7E698}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C802E5B-6B34-48DC-84CC-B4F0DDD7E698}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C802E5B-6B34-48DC-84CC-B4F0DDD7E698}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C802E5B-6B34-48DC-84CC-B4F0DDD7E698}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8884F2A8-73F2-4F2E-9E84-5359EC7B0B7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8884F2A8-73F2-4F2E-9E84-5359EC7B0B7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8884F2A8-73F2-4F2E-9E84-5359EC7B0B7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8884F2A8-73F2-4F2E-9E84-5359EC7B0B7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E1310D5-772B-4C48-B727-4E82D80F7204}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E1310D5-772B-4C48-B727-4E82D80F7204}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E1310D5-772B-4C48-B727-4E82D80F7204}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E1310D5-772B-4C48-B727-4E82D80F7204}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {73E90AE6-84D1-415B-9969-D1B83EE59DC5}
+	EndGlobalSection
+EndGlobal
