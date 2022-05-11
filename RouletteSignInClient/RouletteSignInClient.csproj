@@ -5,6 +5,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>Tgs.RouletteServices.Clients</RootNamespace>
+    <PackageId>Tgs.RouletteSignInClient</PackageId>
+    <Version>0.0.1</Version>
+    <Authors>Raypro</Authors>
+    <Product>Tgs.RouletteSignInClient</Product>
+    <PackageProjectUrl>https://gitlab.com/rayprosoft/tgs-rouletteservice</PackageProjectUrl>
+    <RepositoryUrl>https://gitlab.com/rayprosoft/tgs-rouletteservice.git</RepositoryUrl>
+    <PackageTags>Tgs Roulette SignIn</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
