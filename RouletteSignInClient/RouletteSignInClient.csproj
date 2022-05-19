@@ -29,10 +29,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Protos\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Protobuf Include="..\Tgs.RouletteService\Protos\roulette.proto" Link="Protos\roulette.proto" GrpcServices="None" Access="Internal" />
   </ItemGroup>
 

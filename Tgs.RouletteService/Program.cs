@@ -41,13 +41,14 @@ builder.Services
 			options.Url = config.GetConnectionString("Nats");
 		})
 		.AddProcessor<RouletteSignInProcessor>("tgs.roulette.daily", "tgs.roulette.daily")
-		.AddProcessor<RouletteQueryProcessor>("tgs.roulette.daily.query", "tgs.roulette.daily.query"))
+		.AddProcessor<RouletteQueryProcessor>("tgs.roulette.daily.query", "tgs.roulette.daily.query")
+		.AddProcessor<RouletteSettingProcessor>("tgs.promotion.roulette.setting", "tgs.promotion.roulette.setting"))
 	.AddNatsGlobPatternExchange("*");
 
 builder.Services
 	 .AddSingleton<IConfigureOptions<OtlpExporterOptions>>(
 		sp => new ConfigureNamedOptions<OtlpExporterOptions>(
-			Microsoft.Extensions.Options.Options.DefaultName,
+			Options.DefaultName,
 			exporterOptions =>
 			{
 				var config = sp.GetRequiredService<IConfiguration>();
