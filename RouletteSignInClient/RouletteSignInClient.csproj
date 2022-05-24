@@ -25,7 +25,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="PhoenixToolkits.Protobuf.ExtendTypes" Version="0.0.6" />
-    <PackageReference Include="Tgs.MessageQueue.Nats" Version="2.1.5" />
+    <PackageReference Include="Tgs.MessageQueue.Nats" Version="2.1.6" />
   </ItemGroup>
 
   <ItemGroup>

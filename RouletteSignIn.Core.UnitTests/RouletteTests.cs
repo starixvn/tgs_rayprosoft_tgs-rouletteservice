@@ -1,8 +1,12 @@
 ﻿using System;
-using System.Threading;
+using System.Collections;
 using System.Threading.Tasks;
+using ExpectedObjects;
+using ExpectedObjects.Strategies;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using NSubstitute.Extensions;
+using Tgs.Promotion.Clients;
 using Tgs.RouletteServices;
 using Tgs.RouletteServices.ApplicationServices;
 
@@ -104,5 +108,44 @@ public class RouletteTests
 				Arg.Any<string>(),
 				Arg.Any<DateOnly>(),
 				Arg.Any<int>());
+	}
+
+	[TestMethod]
+	public async Task Get_RoulettePromotion_Info()
+	{
+		var fakePromotionServiceClient = Substitute.For<IPromotionServiceClient>();
+
+		var sut = new GetRoulettePromotionSettingsQueryService(fakePromotionServiceClient);
+
+		var query = new GetRoulettePromotionSettingsQuery(Guid.NewGuid());
+
+		fakePromotionServiceClient.GetPromotionMainInfoAsync(Arg.Is(query.PromotionId))
+			.Returns(new PromotionMainInfo
+			{
+				Id = query.PromotionId,
+				EventDuring = (DateTime.Now.AddDays(-10D), DateTime.Now),
+				IsAutoSent = true,
+				Name = "Test Roulette",
+				PromotionLimitAmount = null,
+				PromotionType = "Roulette"
+			});
+
+		var rouletteItemId = Guid.NewGuid();
+		fakePromotionServiceClient.GetPromotionRuleAsync<RouletteSettings>(Arg.Is(query.PromotionId))
+			.Returns(new RouletteSettings(new[] {
+				new RouletteItem(rouletteItemId, "Test1", 100M, 0.1M, 10M, 0, true)
+			}));
+
+		var expected = new RoulettePromotion(
+			query.PromotionId,
+			null,
+			new RouletteSettings(new[] {
+				new RouletteItem(rouletteItemId, "Test1", 100M, 0.1M, 10M, 0, true)
+			}))
+			.ToExpectedObject(ctx => ctx.IgnoreEqualsOverride());
+
+		var actual = await sut.GetAsync(query);
+
+		expected.ShouldEqual(actual);
 	}
 }

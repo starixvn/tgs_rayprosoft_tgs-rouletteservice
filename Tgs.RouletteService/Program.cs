@@ -32,6 +32,10 @@ builder.Services
 
 		_ = dbBuilder.UseNpgsql(config.GetConnectionString("Tgs"));
 	})
+		.AddPromotionClientServices(((options, _) =>
+		{
+			options.Url = builder.Configuration.GetValue<Uri>("Roulette:PromotionBaseUrl");
+		}))
 	.AddMessageQueue()
 	.AddNatsMessageQueue(natsConfiguration => natsConfiguration
 		.ConfigQueueOptions((options, sp) =>

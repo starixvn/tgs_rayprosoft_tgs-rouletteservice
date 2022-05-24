@@ -1,0 +1,2 @@
+﻿namespace Tgs.RouletteServices.ApplicationServices;
+internal record GetRoulettePromotionSettingsQuery(Guid PromotionId);
