@@ -9,6 +9,7 @@ using NSubstitute.Extensions;
 using Tgs.Promotion.Clients;
 using Tgs.RouletteServices;
 using Tgs.RouletteServices.ApplicationServices;
+using Tgs.ServiceUtility;
 
 namespace RouletteSignIn.Core.UnitTests;
 
@@ -60,13 +61,24 @@ public class RouletteTests
 	public async Task Player_Roulette()
 	{
 		var fakeTgsRepository = Substitute.For<ITgsRepository>();
+		var fakeGetRoulettePromotionService = Substitute.For<IGetService<GetRoulettePromotionSettingsQuery, RoulettePromotion?>>();
 
-		var sut = new RouletteCommandService(fakeTgsRepository);
+		var sut = new RouletteCommandService(
+			fakeTgsRepository,
+			fakeGetRoulettePromotionService);
 
 		var command = new RouletteCommand(
 			Guid.NewGuid(),
 			"player1",
 			DateOnly.FromDateTime(DateTime.Now));
+
+		_ = fakeGetRoulettePromotionService.GetAsync(
+			Arg.Is<GetRoulettePromotionSettingsQuery>(cmd => cmd.PromotionId == command.PromotionId))
+			.Returns(new RoulettePromotion(
+				command.PromotionId,
+				null,
+				new RouletteSettings(
+					Array.Empty<RouletteItem>())));
 
 		await sut.ExecuteAsync(command);
 
@@ -82,8 +94,11 @@ public class RouletteTests
 	public async Task If_Already_Roulette_Should_Not_Roulette_Again()
 	{
 		var fakeTgsRepository = Substitute.For<ITgsRepository>();
+		var fakeGetRoulettePromotionService = Substitute.For<IGetService<GetRoulettePromotionSettingsQuery, RoulettePromotion?>>();
 
-		var sut = new RouletteCommandService(fakeTgsRepository);
+		var sut = new RouletteCommandService(
+			fakeTgsRepository,
+			fakeGetRoulettePromotionService);
 
 		var command = new RouletteCommand(
 			Guid.NewGuid(),
