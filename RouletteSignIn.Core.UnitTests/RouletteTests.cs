@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Threading.Tasks;
 using ExpectedObjects;
-using ExpectedObjects.Strategies;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using NSubstitute.Extensions;
 using Tgs.Promotion.Clients;
 using Tgs.RouletteServices;
 using Tgs.RouletteServices.ApplicationServices;
@@ -58,7 +55,7 @@ public class RouletteTests
 	}
 
 	[TestMethod]
-	public async Task Player_Roulette()
+	public async Task Play_Roulette()
 	{
 		var fakeTgsRepository = Substitute.For<ITgsRepository>();
 		var fakeGetRoulettePromotionService = Substitute.For<IGetService<GetRoulettePromotionSettingsQuery, RoulettePromotion?>>();
@@ -78,7 +75,24 @@ public class RouletteTests
 				command.PromotionId,
 				null,
 				new RouletteSettings(
-					Array.Empty<RouletteItem>())));
+					new[] {
+						new RouletteItem(
+							Guid.NewGuid(),
+							"送8元",
+							8M,
+							0.8M,
+							2M,
+							0,
+							true),
+						new RouletteItem(
+							Guid.NewGuid(),
+							"送18元",
+							18M,
+							0.1M,
+							10M,
+							50,
+							false)
+					})));
 
 		await sut.ExecuteAsync(command);
 
@@ -123,6 +137,50 @@ public class RouletteTests
 				Arg.Any<string>(),
 				Arg.Any<DateOnly>(),
 				Arg.Any<int>());
+	}
+
+	[TestMethod]
+	public void If_Not_Found_Roulette_Promotion_Will_Throw_Exception()
+	{
+		var fakeTgsRepository = Substitute.For<ITgsRepository>();
+		var fakeGetRoulettePromotionService = Substitute.For<IGetService<GetRoulettePromotionSettingsQuery, RoulettePromotion?>>();
+
+		var sut = new RouletteCommandService(
+			fakeTgsRepository,
+			fakeGetRoulettePromotionService);
+
+		var command = new RouletteCommand(
+			Guid.NewGuid(),
+			"player1",
+			DateOnly.FromDateTime(DateTime.Now));
+
+		Assert.ThrowsExceptionAsync<InvalidOperationException>(async () => await sut.ExecuteAsync(command));
+	}
+
+	[TestMethod]
+	public void If_Roulette_Promotion_No_Any_Item_Will_Throw_Exception()
+	{
+		var fakeTgsRepository = Substitute.For<ITgsRepository>();
+		var fakeGetRoulettePromotionService = Substitute.For<IGetService<GetRoulettePromotionSettingsQuery, RoulettePromotion?>>();
+
+		var sut = new RouletteCommandService(
+			fakeTgsRepository,
+			fakeGetRoulettePromotionService);
+
+		var command = new RouletteCommand(
+			Guid.NewGuid(),
+			"player1",
+			DateOnly.FromDateTime(DateTime.Now));
+
+		_ = fakeGetRoulettePromotionService.GetAsync(
+			Arg.Is<GetRoulettePromotionSettingsQuery>(cmd => cmd.PromotionId == command.PromotionId))
+			.Returns(new RoulettePromotion(
+				command.PromotionId,
+				null,
+				new RouletteSettings(
+					Array.Empty<RouletteItem>())));
+
+		Assert.ThrowsExceptionAsync<InvalidOperationException>(async () => await sut.ExecuteAsync(command));
 	}
 
 	[TestMethod]

@@ -1,14 +1,12 @@
 ﻿using System.Security.Cryptography;
 using Tgs.ServiceUtility;
 
-
 namespace Tgs.RouletteServices.ApplicationServices;
 
 using GetRoulettePromotionService = IGetService<GetRoulettePromotionSettingsQuery, RoulettePromotion?>;
 
 internal class RouletteCommandService : ICommandService<RouletteCommand>
 {
-
 	private readonly ITgsRepository _tgsRepository;
 	private readonly GetRoulettePromotionService _getRoulettePromotionService;
 
@@ -38,7 +36,12 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 		if (promotionSettings is null)
 			throw new InvalidOperationException($"Promotion {command.PromotionId} does not exist.");
 
-		var itemIndex = RandomNumberGenerator.GetInt32(0, 6);
+		var itemCount = promotionSettings.CampaignDetail.Items.Count();
+
+		if (itemCount == 0)
+			throw new InvalidOperationException($"Promotion {command.PromotionId} does not have any items.");
+
+		var itemIndex = RandomNumberGenerator.GetInt32(0, itemCount);
 
 		await _tgsRepository.AddRouletteRecordAsync(
 			command.PromotionId,

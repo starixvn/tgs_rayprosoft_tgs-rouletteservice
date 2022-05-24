@@ -212,6 +212,7 @@ public class RouletteSignInTests
 
 		Assert.IsNotNull(actual);
 		Assert.AreNotEqual(Guid.Empty, actual.Id);
+		Assert.IsTrue(actual.ItemIndex >= 0 && actual.ItemIndex < 6, "中獎項目需在範圍內");
 	}
 
 	[TestMethod]
