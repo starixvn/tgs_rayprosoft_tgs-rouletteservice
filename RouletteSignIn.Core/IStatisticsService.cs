@@ -2,9 +2,12 @@
 
 public interface IStatisticsService
 {
-	ValueTask<decimal> GetTotalDistributeAmountAsync(Guid promotionId, CancellationToken cancellationToken = default);
+	ValueTask<bool> CheckOverTotalDistributeAmountAsync(Guid promotionId, decimal limitAmount, CancellationToken cancellationToken = default);
 
-	ValueTask<decimal> IncrementTotalDistributeAmountAsync(Guid promotionId, decimal amount, CancellationToken cancellationToken = default);
-
-	ValueTask<decimal> DecreaseTotalDistributeAmountAsync(Guid promotionId, decimal amount, CancellationToken cancellationToken = default);
+	ValueTask<(bool IsOver, decimal ResultAmount)> IncrementTotalDistributeAmountAsync(
+		Guid promotionId,
+		decimal? limitAmount,
+		decimal amount,
+		decimal defaultAmount,
+		CancellationToken cancellationToken = default);
 }

@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ExpectedObjects;
-using Microsoft.VisualStudio.TestPlatform.Common.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Tgs.Promotion.Clients;
@@ -117,7 +115,9 @@ public class RouletteTests
 		_ = fakeStatisticsService.Received(1)
 			.IncrementTotalDistributeAmountAsync(
 				Arg.Is(command.PromotionId),
-				Arg.Any<decimal>());
+				Arg.Is(default(decimal?)),
+				Arg.Any<decimal>(),
+				Arg.Is(8M));
 	}
 
 	[TestMethod]
@@ -255,12 +255,14 @@ public class RouletteTests
 							false)
 					})));
 
-		_ = fakeStatisticsService.GetTotalDistributeAmountAsync(Arg.Is(command.PromotionId))
-			.Returns(100M);
-
 		fakeShuffleService
 			.Shuffle(Arg.Is(command.PromotionId), Arg.Any<IEnumerable<RouletteItem>>())
 			.Returns(new[] { 1, 1 });
+
+		_ = fakeStatisticsService.CheckOverTotalDistributeAmountAsync(
+			Arg.Is(command.PromotionId),
+			Arg.Is(100M))
+			.Returns(true);
 
 		await sut.ExecuteAsync(command);
 
@@ -274,6 +276,8 @@ public class RouletteTests
 		_ = fakeStatisticsService.Received(1)
 			.IncrementTotalDistributeAmountAsync(
 				Arg.Is(command.PromotionId),
+				Arg.Is(default(decimal?)),
+				Arg.Is(8M),
 				Arg.Is(8M));
 	}
 
@@ -321,13 +325,12 @@ public class RouletteTests
 							false)
 					})));
 
-		_ = fakeStatisticsService.GetTotalDistributeAmountAsync(Arg.Is(command.PromotionId))
-			.Returns(90M);
-
 		_ = fakeStatisticsService.IncrementTotalDistributeAmountAsync(
 			Arg.Is(command.PromotionId),
-			Arg.Is(18M))
-			.Returns(118M);
+			Arg.Is(100M),
+			Arg.Is(18M),
+			Arg.Is(8M))
+			.Returns((false, 100M));
 
 		_ = fakeShuffleService
 			.Shuffle(Arg.Is(command.PromotionId), Arg.Any<IEnumerable<RouletteItem>>())
@@ -341,11 +344,6 @@ public class RouletteTests
 				Arg.Is(command.PlayerCode),
 				Arg.Is(command.Date),
 				Arg.Is(0));
-
-		_ = fakeStatisticsService.Received(1)
-			.DecreaseTotalDistributeAmountAsync(
-				Arg.Is(command.PromotionId),
-				Arg.Is(18M - 8M));
 	}
 
 	[TestMethod]

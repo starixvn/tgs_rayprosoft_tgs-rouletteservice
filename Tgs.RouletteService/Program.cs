@@ -5,6 +5,7 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Tgs.RouletteService;
 using Tgs.RouletteService.MessageQueue;
 using Tgs.RouletteService.Repositories.DependencyInjection;
 
@@ -25,17 +26,26 @@ builder.Logging
 	});
 
 builder.Services
+	.AddSingleton(sp => new RedisConnectionManager(
+		builder.Configuration.GetConnectionString("Redis")))
 	.AddRouletteSignInEvents()
-	.AddRouletteSignInEventRepositories((sp, dbBuilder) =>
-	{
-		var config = sp.GetRequiredService<IConfiguration>();
-
-		_ = dbBuilder.UseNpgsql(config.GetConnectionString("Tgs"));
-	})
-		.AddPromotionClientServices(((options, _) =>
+	.AddRouletteSignInEventRepositories(
+		(sp, dbBuilder) =>
 		{
-			options.Url = builder.Configuration.GetValue<Uri>("Roulette:PromotionBaseUrl");
-		}))
+			var config = sp.GetRequiredService<IConfiguration>();
+
+			_ = dbBuilder.UseNpgsql(config.GetConnectionString("Tgs"));
+		},
+		sp =>
+		{
+			var mgr = sp.GetRequiredService<RedisConnectionManager>();
+
+			return mgr.Database;
+		})
+	.AddPromotionClientServices(((options, _) =>
+	{
+		options.Url = builder.Configuration.GetValue<Uri>("Roulette:PromotionBaseUrl");
+	}))
 	.AddMessageQueue()
 	.AddNatsMessageQueue(natsConfiguration => natsConfiguration
 		.ConfigQueueOptions((options, sp) =>

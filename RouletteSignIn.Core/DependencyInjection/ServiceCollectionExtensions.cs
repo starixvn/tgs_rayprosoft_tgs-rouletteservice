@@ -9,5 +9,6 @@ public static class ServiceCollectionExtensions
 		=> services
 			.RegisterAllServiceUtilityTypes(Assembly.GetExecutingAssembly(), ServiceLifetime.Transient)
 			.AddSingleton<RouletteSerializer>()
-			.AddSingleton<IShuffleService, ShuffleService>();
+			.AddSingleton<IShuffleService, ShuffleService>()
+			.AddSingleton<IStatisticsService, StatisticsService>();
 }

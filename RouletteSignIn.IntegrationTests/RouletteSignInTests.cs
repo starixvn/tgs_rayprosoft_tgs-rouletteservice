@@ -104,10 +104,12 @@ public class RouletteSignInTests
 	{
 		var fakeMessageSender = Substitute.For<IMessageSender>();
 		var fakePromotionServiceClient = Substitute.For<IPromotionServiceClient>();
+		var fakeStatisticsRepository = Substitute.For<IStatisticsRepository>();
 
 		await using var web = new TestRouletteSignInApplication(builder => builder
 			.ConfigureServices(services => services
-				.AddSingleton(fakePromotionServiceClient)));
+				.AddSingleton(fakePromotionServiceClient)
+				.AddSingleton(fakeStatisticsRepository)));
 
 		var sut = new RouletteSignInClient(fakeMessageSender);
 
@@ -219,8 +221,11 @@ public class RouletteSignInTests
 	public async Task Already_Roulette_Will_Return_Exists_Data()
 	{
 		var fakeMessageSender = Substitute.For<IMessageSender>();
+		var fakeStatisticsRepository = Substitute.For<IStatisticsRepository>();
 
-		await using var web = new TestRouletteSignInApplication();
+		await using var web = new TestRouletteSignInApplication(builder => builder
+			.ConfigureServices(services => services
+				.AddSingleton(fakeStatisticsRepository)));
 
 		var sut = new RouletteSignInClient(fakeMessageSender);
 
@@ -232,7 +237,7 @@ public class RouletteSignInTests
 		await using var serviceScope = web.Services.CreateAsyncScope();
 
 		var dbContext = serviceScope.ServiceProvider.GetRequiredService<TgsContext>();
-		
+
 		_ = await dbContext.Players.AddAsync(new Player
 		{
 			PlayerCode = playerCode,
