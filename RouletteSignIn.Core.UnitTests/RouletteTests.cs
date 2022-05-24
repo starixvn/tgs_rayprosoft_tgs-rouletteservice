@@ -63,11 +63,13 @@ public class RouletteTests
 		var fakeTgsRepository = Substitute.For<ITgsRepository>();
 		var fakeGetRoulettePromotionService = Substitute.For<IGetService<GetRoulettePromotionSettingsQuery, RoulettePromotion?>>();
 		var fakeShuffleService = Substitute.For<IShuffleService>();
+		var fakeStatisticsService = Substitute.For<IStatisticsService>();
 
 		var sut = new RouletteCommandService(
 			fakeTgsRepository,
 			fakeGetRoulettePromotionService,
-			fakeShuffleService);
+			fakeShuffleService,
+			fakeStatisticsService);
 
 		var command = new RouletteCommand(
 			Guid.NewGuid(),
@@ -111,6 +113,11 @@ public class RouletteTests
 				Arg.Is(command.PlayerCode),
 				Arg.Is(command.Date),
 				Arg.Any<int>());
+
+		_ = fakeStatisticsService.Received(1)
+			.IncrementTotalDistributeAmountAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Any<decimal>());
 	}
 
 	[TestMethod]
@@ -119,11 +126,13 @@ public class RouletteTests
 		var fakeTgsRepository = Substitute.For<ITgsRepository>();
 		var fakeGetRoulettePromotionService = Substitute.For<IGetService<GetRoulettePromotionSettingsQuery, RoulettePromotion?>>();
 		var fakeShuffleService = Substitute.For<IShuffleService>();
+		var fakeStatisticsService = Substitute.For<IStatisticsService>();
 
 		var sut = new RouletteCommandService(
 			fakeTgsRepository,
 			fakeGetRoulettePromotionService,
-			fakeShuffleService);
+			fakeShuffleService,
+			fakeStatisticsService);
 
 		var command = new RouletteCommand(
 			Guid.NewGuid(),
@@ -156,11 +165,13 @@ public class RouletteTests
 		var fakeTgsRepository = Substitute.For<ITgsRepository>();
 		var fakeGetRoulettePromotionService = Substitute.For<IGetService<GetRoulettePromotionSettingsQuery, RoulettePromotion?>>();
 		var fakeShuffleService = Substitute.For<IShuffleService>();
+		var fakeStatisticsService = Substitute.For<IStatisticsService>();
 
 		var sut = new RouletteCommandService(
 			fakeTgsRepository,
 			fakeGetRoulettePromotionService,
-			fakeShuffleService);
+			fakeShuffleService,
+			fakeStatisticsService);
 
 		var command = new RouletteCommand(
 			Guid.NewGuid(),
@@ -176,11 +187,13 @@ public class RouletteTests
 		var fakeTgsRepository = Substitute.For<ITgsRepository>();
 		var fakeGetRoulettePromotionService = Substitute.For<IGetService<GetRoulettePromotionSettingsQuery, RoulettePromotion?>>();
 		var fakeShuffleService = Substitute.For<IShuffleService>();
+		var fakeStatisticsService = Substitute.For<IStatisticsService>();
 
 		var sut = new RouletteCommandService(
 			fakeTgsRepository,
 			fakeGetRoulettePromotionService,
-			fakeShuffleService);
+			fakeShuffleService,
+			fakeStatisticsService);
 
 		var command = new RouletteCommand(
 			Guid.NewGuid(),
@@ -196,6 +209,143 @@ public class RouletteTests
 					Array.Empty<RouletteItem>())));
 
 		Assert.ThrowsExceptionAsync<InvalidOperationException>(async () => await sut.ExecuteAsync(command));
+	}
+
+	[TestMethod]
+	public async Task If_Over_Total_Distribute_Amount_Will_Return_Default_Item()
+	{
+		var fakeTgsRepository = Substitute.For<ITgsRepository>();
+		var fakeGetRoulettePromotionService = Substitute.For<IGetService<GetRoulettePromotionSettingsQuery, RoulettePromotion?>>();
+		var fakeShuffleService = Substitute.For<IShuffleService>();
+		var fakeStatisticsService = Substitute.For<IStatisticsService>();
+
+		var sut = new RouletteCommandService(
+			fakeTgsRepository,
+			fakeGetRoulettePromotionService,
+			fakeShuffleService,
+			fakeStatisticsService);
+
+		var command = new RouletteCommand(
+			Guid.NewGuid(),
+			"player1",
+			DateOnly.FromDateTime(DateTime.Now));
+
+		_ = fakeGetRoulettePromotionService.GetAsync(
+			Arg.Is<GetRoulettePromotionSettingsQuery>(cmd => cmd.PromotionId == command.PromotionId))
+			.Returns(new RoulettePromotion(
+				command.PromotionId,
+				100M,
+				new RouletteSettings(
+					new[] {
+						new RouletteItem(
+							Guid.NewGuid(),
+							"送8元",
+							8M,
+							0M,
+							2M,
+							0,
+							true),
+						new RouletteItem(
+							Guid.NewGuid(),
+							"送18元",
+							18M,
+							1M,
+							10M,
+							50,
+							false)
+					})));
+
+		_ = fakeStatisticsService.GetTotalDistributeAmountAsync(Arg.Is(command.PromotionId))
+			.Returns(100M);
+
+		fakeShuffleService
+			.Shuffle(Arg.Is(command.PromotionId), Arg.Any<IEnumerable<RouletteItem>>())
+			.Returns(new[] { 1, 1 });
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakeTgsRepository.Received(1)
+			.AddRouletteRecordAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Is(command.PlayerCode),
+				Arg.Is(command.Date),
+				Arg.Is(0));
+
+		_ = fakeStatisticsService.Received(1)
+			.IncrementTotalDistributeAmountAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Is(8M));
+	}
+
+	[TestMethod]
+	public async Task If_Winning_Amount_Already_Over_Total_Distribute_Amount_Will_Change_To_Default_Item()
+	{
+		var fakeTgsRepository = Substitute.For<ITgsRepository>();
+		var fakeGetRoulettePromotionService = Substitute.For<IGetService<GetRoulettePromotionSettingsQuery, RoulettePromotion?>>();
+		var fakeShuffleService = Substitute.For<IShuffleService>();
+		var fakeStatisticsService = Substitute.For<IStatisticsService>();
+
+		var sut = new RouletteCommandService(
+			fakeTgsRepository,
+			fakeGetRoulettePromotionService,
+			fakeShuffleService,
+			fakeStatisticsService);
+
+		var command = new RouletteCommand(
+			Guid.NewGuid(),
+			"player1",
+			DateOnly.FromDateTime(DateTime.Now));
+
+		_ = fakeGetRoulettePromotionService.GetAsync(
+			Arg.Is<GetRoulettePromotionSettingsQuery>(cmd => cmd.PromotionId == command.PromotionId))
+			.Returns(new RoulettePromotion(
+				command.PromotionId,
+				100M,
+				new RouletteSettings(
+					new[] {
+						new RouletteItem(
+							Guid.NewGuid(),
+							"送8元",
+							8M,
+							0M,
+							2M,
+							0,
+							true),
+						new RouletteItem(
+							Guid.NewGuid(),
+							"送18元",
+							18M,
+							1M,
+							10M,
+							50,
+							false)
+					})));
+
+		_ = fakeStatisticsService.GetTotalDistributeAmountAsync(Arg.Is(command.PromotionId))
+			.Returns(90M);
+
+		_ = fakeStatisticsService.IncrementTotalDistributeAmountAsync(
+			Arg.Is(command.PromotionId),
+			Arg.Is(18M))
+			.Returns(118M);
+
+		_ = fakeShuffleService
+			.Shuffle(Arg.Is(command.PromotionId), Arg.Any<IEnumerable<RouletteItem>>())
+			.Returns(new[] { 1, 1 });
+
+		await sut.ExecuteAsync(command);
+
+		_ = fakeTgsRepository.Received(1)
+			.AddRouletteRecordAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Is(command.PlayerCode),
+				Arg.Is(command.Date),
+				Arg.Is(0));
+
+		_ = fakeStatisticsService.Received(1)
+			.DecreaseTotalDistributeAmountAsync(
+				Arg.Is(command.PromotionId),
+				Arg.Is(18M - 8M));
 	}
 
 	[TestMethod]
