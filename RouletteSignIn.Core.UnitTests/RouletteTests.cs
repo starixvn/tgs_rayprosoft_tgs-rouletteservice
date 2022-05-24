@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using ExpectedObjects;
+using Microsoft.VisualStudio.TestPlatform.Common.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Tgs.Promotion.Clients;
@@ -59,10 +62,12 @@ public class RouletteTests
 	{
 		var fakeTgsRepository = Substitute.For<ITgsRepository>();
 		var fakeGetRoulettePromotionService = Substitute.For<IGetService<GetRoulettePromotionSettingsQuery, RoulettePromotion?>>();
+		var fakeShuffleService = Substitute.For<IShuffleService>();
 
 		var sut = new RouletteCommandService(
 			fakeTgsRepository,
-			fakeGetRoulettePromotionService);
+			fakeGetRoulettePromotionService,
+			fakeShuffleService);
 
 		var command = new RouletteCommand(
 			Guid.NewGuid(),
@@ -94,6 +99,10 @@ public class RouletteTests
 							false)
 					})));
 
+		fakeShuffleService
+			.Shuffle(Arg.Is(command.PromotionId), Arg.Any<IEnumerable<RouletteItem>>())
+			.Returns(new[] { 0, 1 });
+
 		await sut.ExecuteAsync(command);
 
 		_ = fakeTgsRepository.Received(1)
@@ -109,10 +118,12 @@ public class RouletteTests
 	{
 		var fakeTgsRepository = Substitute.For<ITgsRepository>();
 		var fakeGetRoulettePromotionService = Substitute.For<IGetService<GetRoulettePromotionSettingsQuery, RoulettePromotion?>>();
+		var fakeShuffleService = Substitute.For<IShuffleService>();
 
 		var sut = new RouletteCommandService(
 			fakeTgsRepository,
-			fakeGetRoulettePromotionService);
+			fakeGetRoulettePromotionService,
+			fakeShuffleService);
 
 		var command = new RouletteCommand(
 			Guid.NewGuid(),
@@ -144,10 +155,12 @@ public class RouletteTests
 	{
 		var fakeTgsRepository = Substitute.For<ITgsRepository>();
 		var fakeGetRoulettePromotionService = Substitute.For<IGetService<GetRoulettePromotionSettingsQuery, RoulettePromotion?>>();
+		var fakeShuffleService = Substitute.For<IShuffleService>();
 
 		var sut = new RouletteCommandService(
 			fakeTgsRepository,
-			fakeGetRoulettePromotionService);
+			fakeGetRoulettePromotionService,
+			fakeShuffleService);
 
 		var command = new RouletteCommand(
 			Guid.NewGuid(),
@@ -162,10 +175,12 @@ public class RouletteTests
 	{
 		var fakeTgsRepository = Substitute.For<ITgsRepository>();
 		var fakeGetRoulettePromotionService = Substitute.For<IGetService<GetRoulettePromotionSettingsQuery, RoulettePromotion?>>();
+		var fakeShuffleService = Substitute.For<IShuffleService>();
 
 		var sut = new RouletteCommandService(
 			fakeTgsRepository,
-			fakeGetRoulettePromotionService);
+			fakeGetRoulettePromotionService,
+			fakeShuffleService);
 
 		var command = new RouletteCommand(
 			Guid.NewGuid(),

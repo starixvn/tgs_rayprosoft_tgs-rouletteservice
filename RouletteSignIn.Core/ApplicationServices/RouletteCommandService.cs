@@ -9,13 +9,16 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 {
 	private readonly ITgsRepository _tgsRepository;
 	private readonly GetRoulettePromotionService _getRoulettePromotionService;
+	private readonly IShuffleService _shuffleService;
 
 	public RouletteCommandService(
 		ITgsRepository tgsRepository,
-		GetRoulettePromotionService getRoulettePromotionService)
+		GetRoulettePromotionService getRoulettePromotionService,
+		IShuffleService shuffleService)
 	{
 		_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 		_getRoulettePromotionService = getRoulettePromotionService ?? throw new ArgumentNullException(nameof(getRoulettePromotionService));
+		_shuffleService = shuffleService ?? throw new ArgumentNullException(nameof(shuffleService));
 	}
 
 	public async ValueTask ExecuteAsync(RouletteCommand command, CancellationToken cancellationToken = default)
@@ -41,13 +44,15 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 		if (itemCount == 0)
 			throw new InvalidOperationException($"Promotion {command.PromotionId} does not have any items.");
 
-		var itemIndex = RandomNumberGenerator.GetInt32(0, itemCount);
+		var deck = _shuffleService.Shuffle(command.PromotionId, promotionSettings.CampaignDetail.Items);
+
+		var deckIndex = RandomNumberGenerator.GetInt32(0, deck.Length);
 
 		await _tgsRepository.AddRouletteRecordAsync(
 			command.PromotionId,
 			command.PlayerCode,
 			command.Date,
-			itemIndex,
+			deck[deckIndex],
 			cancellationToken).ConfigureAwait(false);
 	}
 }

@@ -232,7 +232,7 @@ public class RouletteSignInTests
 		await using var serviceScope = web.Services.CreateAsyncScope();
 
 		var dbContext = serviceScope.ServiceProvider.GetRequiredService<TgsContext>();
-
+		
 		_ = await dbContext.Players.AddAsync(new Player
 		{
 			PlayerCode = playerCode,
