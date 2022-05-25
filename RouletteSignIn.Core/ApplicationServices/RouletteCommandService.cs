@@ -55,7 +55,7 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 				promotionSettings.PromotionLimitAmount.Value,
 				cancellationToken).ConfigureAwait(false))
 		{
-			await _statisticsService.IncrementTotalDistributeAmountAsync(
+			_ = await _statisticsService.IncrementTotalDistributeAmountAsync(
 				command.PromotionId,
 				null,
 				rouletteItems[0].Bonus,
@@ -85,7 +85,7 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 			promotionSettings.PromotionLimitAmount,
 			distributeAmount,
 			rouletteItems[0].Bonus,
-			cancellationToken).ConfigureAwait(false) is (true, var result))
+			cancellationToken).ConfigureAwait(false) is (true, _))
 		{
 			await _tgsRepository.AddRouletteRecordAsync(
 				command.PromotionId,

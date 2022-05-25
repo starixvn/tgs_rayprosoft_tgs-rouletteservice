@@ -47,7 +47,7 @@ internal class TgsRepository : ITgsRepository
 			return;
 
 		var id = await _serialNumberGenerator
-			.GenerateAsync()
+			.GenerateAsync(cancellationToken)
 			.ConfigureAwait(false);
 
 		var insertRecord = new RouletteSignInEvent
@@ -64,7 +64,7 @@ internal class TgsRepository : ITgsRepository
 			.AddAsync(insertRecord, cancellationToken)
 			.ConfigureAwait(false);
 
-		await _dbContext
+		_ = await _dbContext
 			.SaveChangesAsync(cancellationToken)
 			.ConfigureAwait(false);
 	}

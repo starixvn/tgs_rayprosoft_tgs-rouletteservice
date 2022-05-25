@@ -21,7 +21,7 @@ public class RouletteSettingProcessor : IMessageProcessor
 		var settings = _rouletteSerializer.Deserialize<RouletteSettings>(request.Settings);
 
 		if (settings is null)
-			throw new ArgumentNullException(nameof(settings));
+			throw new InvalidOperationException("Settings is null");
 
 		var response = new CampaignDetailResponse
 		{

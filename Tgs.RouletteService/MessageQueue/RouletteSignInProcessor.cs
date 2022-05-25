@@ -37,7 +37,7 @@ public class RouletteSignInProcessor : IMessageProcessor
 			.GetAsync(new GetRouletteRecordQuery(
 				command.PromotionId,
 				command.PlayerCode,
-				command.Date))
+				command.Date), cancellationToken)
 			.ConfigureAwait(false);
 
 		return new RouletteResponse

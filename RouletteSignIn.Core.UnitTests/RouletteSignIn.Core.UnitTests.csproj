@@ -21,4 +21,12 @@
     <ProjectReference Include="..\RouletteSignIn.Core\RouletteSignIn.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EditorConfigFiles Remove="D:\Users\Phoenix\source\repos\Tgs.RouletteService\RouletteSignIn.Core.UnitTests\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="D:\Users\Phoenix\source\repos\Tgs.RouletteService\RouletteSignIn.Core.UnitTests\.editorconfig" />
+  </ItemGroup>
+
 </Project>

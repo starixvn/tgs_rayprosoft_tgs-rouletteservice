@@ -2,7 +2,7 @@
 
 internal class ShuffleService : IShuffleService
 {
-	private static readonly Random _Random = new Random();
+	private static readonly Random _Random = new();
 
 	public int[] Shuffle(Guid promotionId, IEnumerable<RouletteItem> items)
 	{

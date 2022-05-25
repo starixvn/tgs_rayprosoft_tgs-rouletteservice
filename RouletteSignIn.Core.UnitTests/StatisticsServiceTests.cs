@@ -5,6 +5,7 @@ using NSubstitute;
 using Tgs.RouletteServices;
 
 namespace RouletteSignIn.Core.UnitTests;
+
 [TestClass]
 public class StatisticsServiceTests
 {
@@ -35,14 +36,14 @@ public class StatisticsServiceTests
 
 		var promotionId = Guid.NewGuid();
 
-		fakeStatisticsRepository
+		_ = fakeStatisticsRepository
 			.IncrementTotalDistributeAmountAsync(Arg.Is(promotionId), Arg.Is(20M))
 			.Returns(110M);
 
-		var actual = await sut.IncrementTotalDistributeAmountAsync(promotionId, 100M, 20M, 10M);
+		var (isOver, resultAmount) = await sut.IncrementTotalDistributeAmountAsync(promotionId, 100M, 20M, 10M);
 
-		Assert.IsFalse(actual.IsOver);
-		Assert.AreEqual(110M, actual.ResultAmount);
+		Assert.IsFalse(isOver);
+		Assert.AreEqual(110M, resultAmount);
 	}
 
 	[TestMethod]
@@ -54,17 +55,17 @@ public class StatisticsServiceTests
 
 		var promotionId = Guid.NewGuid();
 
-		fakeStatisticsRepository
+		_ = fakeStatisticsRepository
 			.IncrementTotalDistributeAmountAsync(Arg.Is(promotionId), Arg.Is(20M))
 			.Returns(120M);
 
-		fakeStatisticsRepository
+		_ = fakeStatisticsRepository
 			.DecreaseTotalDistributeAmountAsync(Arg.Is(promotionId), Arg.Is(20M - 10M))
 			.Returns(110M);
 
-		var actual = await sut.IncrementTotalDistributeAmountAsync(promotionId, 100M, 20M, 10M);
+		var (isOver, resultAmount) = await sut.IncrementTotalDistributeAmountAsync(promotionId, 100M, 20M, 10M);
 
-		Assert.IsTrue(actual.IsOver);
-		Assert.AreEqual(110M, actual.ResultAmount);
+		Assert.IsTrue(isOver);
+		Assert.AreEqual(110M, resultAmount);
 	}
 }

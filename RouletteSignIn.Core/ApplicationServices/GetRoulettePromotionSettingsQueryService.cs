@@ -28,10 +28,9 @@ internal class GetRoulettePromotionSettingsQueryService : IGetService<GetRoulett
 			.GetPromotionRuleAsync<RouletteSettings>(query.PromotionId, cancellationToken)
 			.ConfigureAwait(false);
 
-		if (settings is null)
-			throw new InvalidOperationException("Roulette settings is null");
-
-		return new RoulettePromotion(
+		return settings is null
+			? throw new InvalidOperationException("Roulette settings is null")
+			: new RoulettePromotion(
 			mainInfo.Id,
 			mainInfo.PromotionLimitAmount,
 			settings);

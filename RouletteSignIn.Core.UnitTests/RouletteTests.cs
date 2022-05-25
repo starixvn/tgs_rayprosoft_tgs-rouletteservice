@@ -99,7 +99,7 @@ public class RouletteTests
 							false)
 					})));
 
-		fakeShuffleService
+		_ = fakeShuffleService
 			.Shuffle(Arg.Is(command.PromotionId), Arg.Any<IEnumerable<RouletteItem>>())
 			.Returns(new[] { 0, 1 });
 
@@ -178,7 +178,7 @@ public class RouletteTests
 			"player1",
 			DateOnly.FromDateTime(DateTime.Now));
 
-		Assert.ThrowsExceptionAsync<InvalidOperationException>(async () => await sut.ExecuteAsync(command));
+		_ = Assert.ThrowsExceptionAsync<InvalidOperationException>(async () => await sut.ExecuteAsync(command));
 	}
 
 	[TestMethod]
@@ -208,7 +208,7 @@ public class RouletteTests
 				new RouletteSettings(
 					Array.Empty<RouletteItem>())));
 
-		Assert.ThrowsExceptionAsync<InvalidOperationException>(async () => await sut.ExecuteAsync(command));
+		_ = Assert.ThrowsExceptionAsync<InvalidOperationException>(async () => await sut.ExecuteAsync(command));
 	}
 
 	[TestMethod]
@@ -255,7 +255,7 @@ public class RouletteTests
 							false)
 					})));
 
-		fakeShuffleService
+		_ = fakeShuffleService
 			.Shuffle(Arg.Is(command.PromotionId), Arg.Any<IEnumerable<RouletteItem>>())
 			.Returns(new[] { 1, 1 });
 
@@ -355,7 +355,7 @@ public class RouletteTests
 
 		var query = new GetRoulettePromotionSettingsQuery(Guid.NewGuid());
 
-		fakePromotionServiceClient.GetPromotionMainInfoAsync(Arg.Is(query.PromotionId))
+		_ = fakePromotionServiceClient.GetPromotionMainInfoAsync(Arg.Is(query.PromotionId))
 			.Returns(new PromotionMainInfo
 			{
 				Id = query.PromotionId,
@@ -367,7 +367,7 @@ public class RouletteTests
 			});
 
 		var rouletteItemId = Guid.NewGuid();
-		fakePromotionServiceClient.GetPromotionRuleAsync<RouletteSettings>(Arg.Is(query.PromotionId))
+		_ = fakePromotionServiceClient.GetPromotionRuleAsync<RouletteSettings>(Arg.Is(query.PromotionId))
 			.Returns(new RouletteSettings(new[] {
 				new RouletteItem(rouletteItemId, "Test1", 100M, 0.1M, 10M, 0, true)
 			}));
