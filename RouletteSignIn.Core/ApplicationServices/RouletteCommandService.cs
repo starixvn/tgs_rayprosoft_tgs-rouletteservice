@@ -78,6 +78,15 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 
 		var itemIndex = deck[deckIndex];
 
+		if (!await _statisticsService.IncrementRouletteItemCountAsync(
+			command.PromotionId,
+			rouletteItems[itemIndex].Id,
+			rouletteItems[itemIndex].IsDefault || rouletteItems[itemIndex].DailyWinningLimit == 0
+				? null
+				: rouletteItems[itemIndex].DailyWinningLimit,
+			cancellationToken).ConfigureAwait(false))
+			itemIndex = 0;
+
 		var distributeAmount = rouletteItems[itemIndex].Bonus;
 
 		if (await _statisticsService.IncrementTotalDistributeAmountAsync(
@@ -85,7 +94,7 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 			promotionSettings.PromotionLimitAmount,
 			distributeAmount,
 			rouletteItems[0].Bonus,
-			cancellationToken).ConfigureAwait(false) is (true, _))
+			cancellationToken).ConfigureAwait(false) is (false, _))
 		{
 			await _tgsRepository.AddRouletteRecordAsync(
 				command.PromotionId,

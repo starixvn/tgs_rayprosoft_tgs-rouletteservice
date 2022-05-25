@@ -32,11 +32,14 @@ internal class StatisticsService : IStatisticsService
 		var isOverLimitAmount = resultAmount > limitAmount
 			&& resultAmount - amount >= limitAmount;
 
-		if (isOverLimitAmount)
+		var differenceAmount = amount - defaultAmount;
+		if (isOverLimitAmount && differenceAmount != 0)
 			resultAmount = await _statisticsRepository
-				.DecreaseTotalDistributeAmountAsync(promotionId, amount - defaultAmount, cancellationToken)
+				.DecreaseTotalDistributeAmountAsync(promotionId, differenceAmount, cancellationToken)
 				.ConfigureAwait(false);
 
 		return (isOverLimitAmount, resultAmount);
 	}
+
+	public ValueTask<bool> IncrementRouletteItemCountAsync(Guid promotionId, Guid itemId, int? limitCount, CancellationToken cancellationToken = default) => throw new NotImplementedException();
 }

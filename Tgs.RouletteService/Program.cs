@@ -42,10 +42,8 @@ builder.Services
 
 			return mgr.Database;
 		})
-	.AddPromotionClientServices(((options, _) =>
-	{
-		options.Url = builder.Configuration.GetValue<Uri>("Roulette:PromotionBaseUrl");
-	}))
+	.AddPromotionClientServices((options, _) =>
+		options.Url = builder.Configuration.GetValue<Uri>("Roulette:PromotionBaseUrl"))
 	.AddMessageQueue()
 	.AddNatsMessageQueue(natsConfiguration => natsConfiguration
 		.ConfigQueueOptions((options, sp) =>

@@ -68,4 +68,28 @@ public class StatisticsServiceTests
 		Assert.IsTrue(isOver);
 		Assert.AreEqual(110M, resultAmount);
 	}
+
+	[TestMethod]
+	public async Task IncrementTotalDistributeAmount_Over_Limit_But_DifferenceAmount_Is_Zero()
+	{
+		var fakeStatisticsRepository = Substitute.For<IStatisticsRepository>();
+
+		var sut = new StatisticsService(fakeStatisticsRepository);
+
+		var promotionId = Guid.NewGuid();
+
+		_ = fakeStatisticsRepository
+			.IncrementTotalDistributeAmountAsync(Arg.Is(promotionId), Arg.Is(20M))
+			.Returns(120M);
+
+		var (isOver, resultAmount) = await sut.IncrementTotalDistributeAmountAsync(promotionId, 100M, 20M, 20M);
+
+		Assert.IsTrue(isOver);
+		Assert.AreEqual(120M, resultAmount);
+
+		_ = fakeStatisticsRepository.Received(0)
+			.DecreaseTotalDistributeAmountAsync(
+				Arg.Any<Guid>(),
+				Arg.Any<decimal>());
+	}
 }
