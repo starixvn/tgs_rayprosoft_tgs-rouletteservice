@@ -1,6 +1,5 @@
 ﻿using ExpectedObjects;
 using Google.Protobuf;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Tgs.Promotion.Clients.Protos;
 using Tgs.RouletteService.MessageQueue;
 using Tgs.RouletteServices;
@@ -247,7 +246,6 @@ public class RouletteSettingProcessorTests
 		};
 
 		var sut = new RouletteSettingProcessor(serializer);
-
 
 		await Assert.ThrowsExceptionAsync<InvalidOperationException>(async () => await sut.HandleAsync(request.ToByteArray()));
 	}

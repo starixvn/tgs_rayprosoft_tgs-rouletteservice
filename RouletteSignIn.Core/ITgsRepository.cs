@@ -9,5 +9,6 @@ public interface ITgsRepository
 		string playerCode,
 		DateOnly date,
 		int itemIndex,
+		decimal bonus,
 		CancellationToken cancellationToken = default);
 }

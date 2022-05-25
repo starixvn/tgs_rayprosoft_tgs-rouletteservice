@@ -67,6 +67,7 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 				command.PlayerCode,
 				command.Date,
 				0,
+				rouletteItems[0].Bonus,
 				cancellationToken).ConfigureAwait(false);
 
 			return;
@@ -102,6 +103,7 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 				command.PlayerCode,
 				command.Date,
 				itemIndex,
+				distributeAmount,
 				cancellationToken).ConfigureAwait(false);
 		}
 		else
@@ -111,6 +113,7 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 				command.PlayerCode,
 				command.Date,
 				0,
+				rouletteItems[0].Bonus,
 				cancellationToken).ConfigureAwait(false);
 		}
 	}

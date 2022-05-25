@@ -124,7 +124,8 @@ public class RouletteTests
 				Arg.Is(command.PromotionId),
 				Arg.Is(command.PlayerCode),
 				Arg.Is(command.Date),
-				Arg.Any<int>());
+				Arg.Any<int>(),
+				Arg.Any<decimal>());
 
 		_ = fakeStatisticsService.Received(1)
 			.IncrementTotalDistributeAmountAsync(
@@ -170,7 +171,8 @@ public class RouletteTests
 				Arg.Is(command.PromotionId),
 				Arg.Any<string>(),
 				Arg.Any<DateOnly>(),
-				Arg.Any<int>());
+				Arg.Any<int>(),
+				Arg.Any<decimal>());
 	}
 
 	[TestMethod]
@@ -286,7 +288,8 @@ public class RouletteTests
 				Arg.Is(command.PromotionId),
 				Arg.Is(command.PlayerCode),
 				Arg.Is(command.Date),
-				Arg.Is(0));
+				Arg.Is(0),
+				Arg.Is(8M));
 
 		_ = fakeStatisticsService.Received(1)
 			.IncrementTotalDistributeAmountAsync(
@@ -365,7 +368,8 @@ public class RouletteTests
 				Arg.Is(command.PromotionId),
 				Arg.Is(command.PlayerCode),
 				Arg.Is(command.Date),
-				Arg.Is(0));
+				Arg.Is(0),
+				Arg.Is(8M));
 	}
 
 	[TestMethod]
@@ -437,7 +441,8 @@ public class RouletteTests
 				Arg.Is(command.PromotionId),
 				Arg.Is(command.PlayerCode),
 				Arg.Is(command.Date),
-				Arg.Is(0));
+				Arg.Is(0),
+				Arg.Is(8M));
 	}
 
 	[TestMethod]

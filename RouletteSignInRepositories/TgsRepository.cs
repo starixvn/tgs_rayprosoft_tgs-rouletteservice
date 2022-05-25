@@ -37,6 +37,7 @@ internal class TgsRepository : ITgsRepository
 		string playerCode,
 		DateOnly date,
 		int itemIndex,
+		decimal bonus,
 		CancellationToken cancellationToken = default)
 	{
 		var player = await _dbContext.Players
@@ -57,7 +58,8 @@ internal class TgsRepository : ITgsRepository
 			BrandId = player.BrandId,
 			PromotionId = promotionId,
 			ItemIndex = itemIndex,
-			Date = date
+			Date = date,
+			Bonus = bonus
 		};
 
 		_ = await _dbContext.RouletteSignInEvents
