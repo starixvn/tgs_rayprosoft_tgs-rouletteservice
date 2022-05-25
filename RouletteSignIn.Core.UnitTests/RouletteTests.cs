@@ -174,7 +174,7 @@ public class RouletteTests
 	}
 
 	[TestMethod]
-	public void If_Not_Found_Roulette_Promotion_Will_Throw_Exception()
+	public async Task If_Not_Found_Roulette_Promotion_Will_Throw_Exception()
 	{
 		var fakeTgsRepository = Substitute.For<ITgsRepository>();
 		var fakeGetRoulettePromotionService = Substitute.For<IGetService<GetRoulettePromotionSettingsQuery, RoulettePromotion?>>();
@@ -192,11 +192,12 @@ public class RouletteTests
 			"player1",
 			DateOnly.FromDateTime(DateTime.Now));
 
-		_ = Assert.ThrowsExceptionAsync<InvalidOperationException>(async () => await sut.ExecuteAsync(command));
+		await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+			async () => await sut.ExecuteAsync(command));
 	}
 
 	[TestMethod]
-	public void If_Roulette_Promotion_No_Any_Item_Will_Throw_Exception()
+	public async Task If_Roulette_Promotion_No_Any_Item_Will_Throw_Exception()
 	{
 		var fakeTgsRepository = Substitute.For<ITgsRepository>();
 		var fakeGetRoulettePromotionService = Substitute.For<IGetService<GetRoulettePromotionSettingsQuery, RoulettePromotion?>>();
@@ -222,7 +223,7 @@ public class RouletteTests
 				new RouletteSettings(
 					Array.Empty<RouletteItem>())));
 
-		_ = Assert.ThrowsExceptionAsync<InvalidOperationException>(async () => await sut.ExecuteAsync(command));
+		await Assert.ThrowsExceptionAsync<InvalidOperationException>(async () => await sut.ExecuteAsync(command));
 	}
 
 	[TestMethod]
