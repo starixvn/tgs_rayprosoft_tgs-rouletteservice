@@ -9,7 +9,8 @@ public class RouletteSerializer
 	{
 		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
 		WriteIndented = false,
-		DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
+		DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+		Converters = { new RouletteItemJsonConverter() }
 	};
 
 	public T? Deserialize<T>(string json)

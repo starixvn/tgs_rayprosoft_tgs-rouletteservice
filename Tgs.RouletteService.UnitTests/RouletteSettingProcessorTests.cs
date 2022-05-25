@@ -66,8 +66,7 @@ public class RouletteSettingProcessorTests
 			.ToExpectedObject(ctx => ctx
 				.MemberShouldMatch(
 					settings => settings.Items,
-					items => items.ToExpectedObject(
-						mc => mc.IgnoreEqualsOverride()))
+					mc => mc.IgnoreEqualsOverride())
 				.IgnoreEqualsOverride())
 			.ShouldMatch(actualSettings);
 		Assert.AreEqual(true, actualSettings.Items.First().IsDefault);
@@ -132,8 +131,7 @@ public class RouletteSettingProcessorTests
 			.ToExpectedObject(ctx => ctx
 				.MemberShouldMatch(
 					settings => settings.Items,
-					items => items.ToExpectedObject(
-						mc => mc.IgnoreEqualsOverride()))
+					mc => mc.IgnoreEqualsOverride())
 				.IgnoreEqualsOverride())
 			.ShouldMatch(actualSettings);
 		Assert.AreEqual(true, actualSettings.Items.First().IsDefault);
@@ -266,5 +264,66 @@ public class RouletteSettingProcessorTests
 
 		await Assert.ThrowsExceptionAsync<InvalidOperationException>(
 			async () => await sut.HandleAsync(request.ToByteArray()));
+	}
+
+	[TestMethod]
+	public async Task Create_New_Item_Will_Auto_Assign_Id()
+	{
+		var request = new CampaignDetailRequest
+		{
+			PromotionId = Guid.NewGuid(),
+			Settings = "{\"items\":[{\"title\":\"\\u90018\\u5143\",\"bonus\":8,\"winningProbability\":0.4,\"turnoverRate\":2,\"isDefault\":true},{\"title\":\"\\u900118\\u5143\",\"bonus\":18,\"winningProbability\":0.3,\"turnoverRate\":10,\"dailyWinningLimit\":50},{\"title\":\"\\u900128\\u5143\",\"bonus\":18,\"winningProbability\":0.3,\"turnoverRate\":10,\"dailyWinningLimit\":50}]}"
+		};
+
+		var serializer = new RouletteSerializer();
+
+		var sut = new RouletteSettingProcessor(serializer);
+
+		var expectedSettings = new RouletteSettings(new[] {
+			new RouletteItem(
+				Guid.NewGuid(),
+				"送8元",
+				8M,
+				0.4M,
+				2M,
+				0,
+				true),
+			new RouletteItem(
+				Guid.NewGuid(),
+				"送18元",
+				18M,
+				0.3M,
+				10M,
+				50,
+				false),
+			new RouletteItem(
+				Guid.NewGuid(),
+				"送28元",
+				18M,
+				0.3M,
+				10M,
+				50,
+				false)
+		});
+
+		var response = await sut.HandleAsync(request.ToByteArray());
+
+		var actual = CampaignDetailResponse.Parser.ParseFrom(response.Span);
+
+		var actualSettings = serializer.Deserialize<RouletteSettings>(actual.CampaignDetail);
+
+		Assert.IsNotNull(actualSettings);
+		expectedSettings
+			.ToExpectedObject(ctx => ctx
+				.ArrayMemberShouldMatch(
+					rs => rs.Items,
+					itemCtx => itemCtx
+						.Ignore(item => item.Id)
+						.IgnoreEqualsOverride())
+				.IgnoreEqualsOverride())
+			.ShouldMatch(actualSettings);
+		Assert.AreEqual(true, actualSettings.Items.First().IsDefault);
+		Assert.AreEqual(1, actualSettings.Items.Count(item => item.IsDefault));
+		Assert.AreEqual(1M, actualSettings.Items.Sum(item => item.WinningProbability));
 	}
 }

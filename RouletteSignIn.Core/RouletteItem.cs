@@ -1,4 +1,6 @@
-﻿namespace Tgs.RouletteServices;
+﻿using System.Text.Json.Serialization;
+
+namespace Tgs.RouletteServices;
 public record RouletteItem(
 	Guid Id,
 	string Title,
