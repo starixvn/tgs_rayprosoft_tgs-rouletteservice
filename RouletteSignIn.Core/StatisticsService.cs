@@ -41,5 +41,26 @@ internal class StatisticsService : IStatisticsService
 		return (isOverLimitAmount, resultAmount);
 	}
 
-	public ValueTask<bool> IncrementRouletteItemCountAsync(Guid promotionId, Guid itemId, int? limitCount, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+	public async ValueTask<bool> IncrementRouletteItemCountAsync(
+		Guid promotionId,
+		Guid itemId,
+		DateOnly date,
+		int? limitCount,
+		CancellationToken cancellationToken = default)
+	{
+		var result = await _statisticsRepository
+			.IncrementRouletteItemCountAsync(promotionId, itemId, date, cancellationToken)
+			.ConfigureAwait(false);
+
+		if (limitCount is not null && result > limitCount)
+		{
+			_ = await _statisticsRepository
+				.DecreaseRouletteItemCountAsync(promotionId, itemId, date, cancellationToken)
+				.ConfigureAwait(false);
+
+			return false;
+		}
+
+		return true;
+	}
 }

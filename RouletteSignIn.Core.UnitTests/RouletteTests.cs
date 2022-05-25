@@ -109,6 +109,7 @@ public class RouletteTests
 		_ = fakeStatisticsService.IncrementRouletteItemCountAsync(
 			Arg.Is(command.PromotionId),
 			Arg.Any<Guid>(),
+			Arg.Any<DateOnly>(),
 			Arg.Any<int?>())
 			.Returns(true);
 
@@ -341,6 +342,7 @@ public class RouletteTests
 		_ = fakeStatisticsService.IncrementRouletteItemCountAsync(
 			Arg.Is(command.PromotionId),
 			Arg.Any<Guid>(),
+			Arg.Any<DateOnly>(),
 			Arg.Any<int?>())
 			.Returns(true);
 
@@ -412,6 +414,7 @@ public class RouletteTests
 		_ = fakeStatisticsService.IncrementRouletteItemCountAsync(
 			Arg.Is(command.PromotionId),
 			Arg.Any<Guid>(),
+			Arg.Any<DateOnly>(),
 			Arg.Any<int?>())
 			.Returns(false);
 

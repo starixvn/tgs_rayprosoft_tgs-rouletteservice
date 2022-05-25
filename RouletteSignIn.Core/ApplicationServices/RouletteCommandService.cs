@@ -81,6 +81,7 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 		if (!await _statisticsService.IncrementRouletteItemCountAsync(
 			command.PromotionId,
 			rouletteItems[itemIndex].Id,
+			command.Date,
 			rouletteItems[itemIndex].IsDefault || rouletteItems[itemIndex].DailyWinningLimit == 0
 				? null
 				: rouletteItems[itemIndex].DailyWinningLimit,

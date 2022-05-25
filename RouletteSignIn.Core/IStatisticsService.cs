@@ -11,5 +11,10 @@ public interface IStatisticsService
 		decimal defaultAmount,
 		CancellationToken cancellationToken = default);
 
-	ValueTask<bool> IncrementRouletteItemCountAsync(Guid promotionId, Guid itemId, int? limitCount, CancellationToken cancellationToken = default);
+	ValueTask<bool> IncrementRouletteItemCountAsync(
+		Guid promotionId,
+		Guid itemId,
+		DateOnly date,
+		int? limitCount,
+		CancellationToken cancellationToken = default);
 }

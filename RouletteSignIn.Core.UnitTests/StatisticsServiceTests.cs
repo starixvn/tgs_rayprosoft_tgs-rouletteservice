@@ -92,4 +92,67 @@ public class StatisticsServiceTests
 				Arg.Any<Guid>(),
 				Arg.Any<decimal>());
 	}
+
+	[TestMethod]
+	public async Task IncrementRouletteItemCount_Without_Over_Limit()
+	{
+		var fakeStatisticsRepository = Substitute.For<IStatisticsRepository>();
+
+		var sut = new StatisticsService(fakeStatisticsRepository);
+
+		var promotionId = Guid.NewGuid();
+		var rouletteItemId = Guid.NewGuid();
+		var date = DateOnly.FromDateTime(DateTime.Now);
+
+		var actual = await sut.IncrementRouletteItemCountAsync(promotionId, rouletteItemId, date, 10);
+
+		Assert.IsTrue(actual);
+
+		_ = fakeStatisticsRepository.Received(1)
+			.IncrementRouletteItemCountAsync(
+				Arg.Is(promotionId),
+				Arg.Is(rouletteItemId),
+				Arg.Is(date));
+
+		_ = fakeStatisticsRepository.Received(0)
+			.DecreaseRouletteItemCountAsync(
+				Arg.Any<Guid>(),
+				Arg.Any<Guid>(),
+				Arg.Any<DateOnly>());
+	}
+
+	[TestMethod]
+	public async Task IncrementRouletteItemCount_Over_Limit()
+	{
+		var fakeStatisticsRepository = Substitute.For<IStatisticsRepository>();
+
+		var sut = new StatisticsService(fakeStatisticsRepository);
+
+		var promotionId = Guid.NewGuid();
+		var rouletteItemId = Guid.NewGuid();
+		var date = DateOnly.FromDateTime(DateTime.Now);
+
+		_ = fakeStatisticsRepository
+			.IncrementRouletteItemCountAsync(
+				Arg.Is(promotionId),
+				Arg.Is(rouletteItemId),
+				Arg.Is(date))
+			.Returns(11);
+
+		var actual = await sut.IncrementRouletteItemCountAsync(promotionId, rouletteItemId, date, 10);
+
+		Assert.IsFalse(actual);
+
+		_ = fakeStatisticsRepository.Received(1)
+			.IncrementRouletteItemCountAsync(
+				Arg.Is(promotionId),
+				Arg.Is(rouletteItemId),
+				Arg.Is(date));
+
+		_ = fakeStatisticsRepository.Received(1)
+			.DecreaseRouletteItemCountAsync(
+				Arg.Is(promotionId),
+				Arg.Is(rouletteItemId),
+				Arg.Is(date));
+	}
 }
