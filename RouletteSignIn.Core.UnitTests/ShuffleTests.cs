@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Tgs.RouletteServices;
 
@@ -7,7 +8,7 @@ namespace RouletteSignIn.Core.UnitTests;
 public class ShuffleTests
 {
 	[TestMethod]
-	public void Shuffle_By_RouletteItems()
+	public async Task Shuffle_By_RouletteItems()
 	{
 		var sut = new ShuffleService();
 
@@ -62,7 +63,7 @@ public class ShuffleTests
 				false)
 		};
 
-		var deck = sut.Shuffle(Guid.NewGuid(), rouletteItems);
+		var deck = await sut.ShuffleAsync(Guid.NewGuid(), rouletteItems);
 
 		Assert.AreEqual(100, deck.Length);
 	}

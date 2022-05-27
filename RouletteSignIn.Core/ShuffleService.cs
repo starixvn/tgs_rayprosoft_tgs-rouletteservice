@@ -4,7 +4,7 @@ internal class ShuffleService : IShuffleService
 {
 	private static readonly Random _Random = new();
 
-	public int[] Shuffle(Guid promotionId, IEnumerable<RouletteItem> items)
+	public ValueTask<int[]> ShuffleAsync(Guid promotionId, IEnumerable<RouletteItem> items)
 	{
 		var proportions = items
 			.Select(item => Math.Floor(item.WinningProbability * 10000M))
@@ -29,7 +29,7 @@ internal class ShuffleService : IShuffleService
 		for (var i = 0; i < 2; i++)
 			deck = Shuffle(deck);
 
-		return deck.ToArray();
+		return ValueTask.FromResult(deck.ToArray());
 	}
 
 	private static List<int> Shuffle(IEnumerable<int> deck)

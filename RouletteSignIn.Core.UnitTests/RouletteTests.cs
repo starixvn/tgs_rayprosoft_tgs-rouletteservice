@@ -114,7 +114,7 @@ public class RouletteTests
 			.Returns(true);
 
 		_ = fakeShuffleService
-			.Shuffle(Arg.Is(command.PromotionId), Arg.Any<IEnumerable<RouletteItem>>())
+			.ShuffleAsync(Arg.Is(command.PromotionId), Arg.Any<IEnumerable<RouletteItem>>())
 			.Returns(new[] { 0, 1 });
 
 		await sut.ExecuteAsync(command);
@@ -273,7 +273,7 @@ public class RouletteTests
 					})));
 
 		_ = fakeShuffleService
-			.Shuffle(Arg.Is(command.PromotionId), Arg.Any<IEnumerable<RouletteItem>>())
+			.ShuffleAsync(Arg.Is(command.PromotionId), Arg.Any<IEnumerable<RouletteItem>>())
 			.Returns(new[] { 1, 1 });
 
 		_ = fakeStatisticsService.CheckOverTotalDistributeAmountAsync(
@@ -358,7 +358,7 @@ public class RouletteTests
 			.Returns((true, 100M));
 
 		_ = fakeShuffleService
-			.Shuffle(Arg.Is(command.PromotionId), Arg.Any<IEnumerable<RouletteItem>>())
+			.ShuffleAsync(Arg.Is(command.PromotionId), Arg.Any<IEnumerable<RouletteItem>>())
 			.Returns(new[] { 1, 1 });
 
 		await sut.ExecuteAsync(command);
@@ -431,7 +431,7 @@ public class RouletteTests
 			.Returns((false, 100M));
 
 		_ = fakeShuffleService
-			.Shuffle(Arg.Is(command.PromotionId), Arg.Any<IEnumerable<RouletteItem>>())
+			.ShuffleAsync(Arg.Is(command.PromotionId), Arg.Any<IEnumerable<RouletteItem>>())
 			.Returns(new[] { 1, 1 });
 
 		await sut.ExecuteAsync(command);

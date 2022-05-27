@@ -73,7 +73,9 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 			return;
 		}
 
-		var deck = _shuffleService.Shuffle(command.PromotionId, promotionSettings.CampaignDetail.Items);
+		var deck = await _shuffleService
+			.ShuffleAsync(command.PromotionId, promotionSettings.CampaignDetail.Items)
+			.ConfigureAwait(false);
 
 		var deckIndex = RandomNumberGenerator.GetInt32(0, deck.Length);
 

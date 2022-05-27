@@ -2,5 +2,5 @@
 
 public interface IShuffleService
 {
-	int[] Shuffle(Guid promotionId, IEnumerable<RouletteItem> items);
+	ValueTask<int[]> ShuffleAsync(Guid promotionId, IEnumerable<RouletteItem> items);
 }
