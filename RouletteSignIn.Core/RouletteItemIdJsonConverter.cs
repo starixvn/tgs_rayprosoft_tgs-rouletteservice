@@ -16,10 +16,7 @@ internal class RouletteItemJsonConverter : JsonConverter<RouletteItem>
 	{
 		var item = JsonSerializer.Deserialize<RouletteItem>(ref reader, _JsonSerializerOptions);
 
-		if (item is not null && item.Id == Guid.Empty)
-			return item with { Id = Guid.NewGuid() };
-
-		return item;
+		return item is not null && item.Id == Guid.Empty ? (item with { Id = Guid.NewGuid() }) : item;
 	}
 
 	public override void Write(Utf8JsonWriter writer, RouletteItem value, JsonSerializerOptions options)

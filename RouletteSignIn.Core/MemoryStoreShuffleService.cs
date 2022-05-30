@@ -31,7 +31,7 @@ internal class MemoryStoreShuffleService : IShuffleService
 				cacheKey,
 				async entry =>
 				{
-					entry.SetAbsoluteExpiration(DateTimeOffset.Now.AddHours(6D));
+					_ = entry.SetAbsoluteExpiration(DateTimeOffset.Now.AddHours(6D));
 
 					return await _sourceService
 						.ShuffleAsync(promotionId, items)

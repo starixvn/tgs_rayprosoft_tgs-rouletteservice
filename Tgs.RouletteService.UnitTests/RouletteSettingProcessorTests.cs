@@ -245,7 +245,7 @@ public class RouletteSettingProcessorTests
 
 		var sut = new RouletteSettingProcessor(serializer);
 
-		await Assert.ThrowsExceptionAsync<InvalidOperationException>(async () => await sut.HandleAsync(request.ToByteArray()));
+		_ = await Assert.ThrowsExceptionAsync<InvalidOperationException>(async () => await sut.HandleAsync(request.ToByteArray()));
 	}
 
 	[TestMethod]
@@ -262,7 +262,7 @@ public class RouletteSettingProcessorTests
 
 		var sut = new RouletteSettingProcessor(serializer);
 
-		await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+		_ = await Assert.ThrowsExceptionAsync<InvalidOperationException>(
 			async () => await sut.HandleAsync(request.ToByteArray()));
 	}
 

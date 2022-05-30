@@ -4,6 +4,7 @@ using Tgs.ServiceUtility;
 namespace Tgs.RouletteServices.ApplicationServices;
 
 using GetRoulettePromotionService = IGetService<GetRoulettePromotionSettingsQuery, RoulettePromotion?>;
+using DistributeService = ICommandService<DistributeBonusCommand>;
 
 internal class RouletteCommandService : ICommandService<RouletteCommand>
 {
@@ -11,17 +12,20 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 	private readonly GetRoulettePromotionService _getRoulettePromotionService;
 	private readonly IShuffleService _shuffleService;
 	private readonly IStatisticsService _statisticsService;
+	private readonly DistributeService _distributeService;
 
 	public RouletteCommandService(
 		ITgsRepository tgsRepository,
 		GetRoulettePromotionService getRoulettePromotionService,
 		IShuffleService shuffleService,
-		IStatisticsService statisticsService)
+		IStatisticsService statisticsService,
+		DistributeService distributeService)
 	{
 		_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 		_getRoulettePromotionService = getRoulettePromotionService ?? throw new ArgumentNullException(nameof(getRoulettePromotionService));
 		_shuffleService = shuffleService ?? throw new ArgumentNullException(nameof(shuffleService));
 		_statisticsService = statisticsService ?? throw new ArgumentNullException(nameof(statisticsService));
+		_distributeService = distributeService ?? throw new ArgumentNullException(nameof(distributeService));
 	}
 
 	public async ValueTask ExecuteAsync(RouletteCommand command, CancellationToken cancellationToken = default)
@@ -70,6 +74,13 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 				rouletteItems[0].Bonus,
 				cancellationToken).ConfigureAwait(false);
 
+			_ = Task.Run(() => _distributeService.ExecuteAsync(new DistributeBonusCommand(
+				command.PromotionId,
+				command.PlayerCode,
+				command.Date,
+				rouletteItems[0].Bonus,
+				rouletteItems[0].Bonus * rouletteItems[0].TurnoverRate), default));
+
 			return;
 		}
 
@@ -107,6 +118,13 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 				itemIndex,
 				distributeAmount,
 				cancellationToken).ConfigureAwait(false);
+
+			_ = Task.Run(() => _distributeService.ExecuteAsync(new DistributeBonusCommand(
+				command.PromotionId,
+				command.PlayerCode,
+				command.Date,
+				rouletteItems[itemIndex].Bonus,
+				rouletteItems[itemIndex].Bonus * rouletteItems[itemIndex].TurnoverRate), default));
 		}
 		else
 		{
@@ -117,6 +135,13 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 				0,
 				rouletteItems[0].Bonus,
 				cancellationToken).ConfigureAwait(false);
+
+			_ = Task.Run(() => _distributeService.ExecuteAsync(new DistributeBonusCommand(
+				command.PromotionId,
+				command.PlayerCode,
+				command.Date,
+				rouletteItems[0].Bonus,
+				rouletteItems[0].Bonus * rouletteItems[0].TurnoverRate), default));
 		}
 	}
 }
