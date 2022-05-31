@@ -307,7 +307,7 @@ public class RouletteTests
 		_ = fakeStatisticsService.Received(1)
 			.IncrementTotalDistributeAmountAsync(
 				Arg.Is(command.PromotionId),
-				Arg.Is(default(decimal?)),
+				Arg.Is(100M),
 				Arg.Is(8M),
 				Arg.Is(8M));
 	}

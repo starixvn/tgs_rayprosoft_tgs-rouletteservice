@@ -14,8 +14,8 @@ public static class ServiceCollectionExtensions
 			.AddMemoryCache()
 			.AddSingleton<RouletteSerializer>()
 			.AddSingleton<IShuffleService>(sp => ActivatorUtilities.CreateInstance<MemoryStoreShuffleService>(
-				   sp,
-				   ActivatorUtilities.CreateInstance<ShuffleService>(sp)))
+				sp,
+				ActivatorUtilities.CreateInstance<ShuffleService>(sp)))
 			.AddSingleton<IStatisticsService, StatisticsService>()
 			.AddTransient<IGetService<GetPromotionDistributePlanQuery, PromotionDistributePlanInfo>, GetPromotionDistributePlanQueryService>()
 			.Decorate<IGetService<GetPromotionDistributePlanQuery, PromotionDistributePlanInfo>, MemoryCachedGetPromotionDistributePlanQueryService>();

@@ -3,8 +3,8 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.RouletteServices.ApplicationServices;
 
-using GetRoulettePromotionService = IGetService<GetRoulettePromotionSettingsQuery, RoulettePromotion?>;
 using DistributeService = ICommandService<DistributeBonusCommand>;
+using GetRoulettePromotionService = IGetService<GetRoulettePromotionSettingsQuery, RoulettePromotion?>;
 
 internal class RouletteCommandService : ICommandService<RouletteCommand>
 {
@@ -53,63 +53,75 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 
 		var rouletteItems = promotionSettings.CampaignDetail.Items.ToArray();
 
+		var (totalAmount, bonus, bucket) = await ProcessRouletteAsync(
+			command,
+			promotionSettings,
+			rouletteItems,
+			cancellationToken).ConfigureAwait(false);
+
+		_ = Task.Run(() =>
+		{
+			return _distributeService.ExecuteAsync(new DistributeBonusCommand(
+				command.PromotionId,
+				command.PlayerCode,
+				command.Date,
+				bonus,
+				bucket), default);
+		});
+	}
+
+	private async Task<(decimal TotalAmount, decimal Bonus, decimal Bucket)> ProcessRouletteAsync(
+		RouletteCommand command,
+		RoulettePromotion promotionSettings,
+		RouletteItem[] rouletteItems,
+		CancellationToken cancellationToken)
+	{
 		if (promotionSettings.PromotionLimitAmount is not null
 			&& await _statisticsService.CheckOverTotalDistributeAmountAsync(
 				command.PromotionId,
 				promotionSettings.PromotionLimitAmount.Value,
 				cancellationToken).ConfigureAwait(false))
 		{
-			_ = await _statisticsService.IncrementTotalDistributeAmountAsync(
-				command.PromotionId,
-				null,
-				rouletteItems[0].Bonus,
-				rouletteItems[0].Bonus,
-				cancellationToken).ConfigureAwait(false);
-
-			await _tgsRepository.AddRouletteRecordAsync(
-				command.PromotionId,
-				command.PlayerCode,
-				command.Date,
+			return await ProcessRouletteResultAsync(
+				command,
+				promotionSettings,
+				rouletteItems,
 				0,
-				rouletteItems[0].Bonus,
+				cancellationToken).ConfigureAwait(false);
+		}
+		else
+		{
+			var itemIndex = await PlayRouletteAsync(
+				command,
+				rouletteItems,
 				cancellationToken).ConfigureAwait(false);
 
-			_ = Task.Run(() => _distributeService.ExecuteAsync(new DistributeBonusCommand(
-				command.PromotionId,
-				command.PlayerCode,
-				command.Date,
-				rouletteItems[0].Bonus,
-				rouletteItems[0].Bonus * rouletteItems[0].TurnoverRate), default));
-
-			return;
+			return await ProcessRouletteResultAsync(
+				command,
+				promotionSettings,
+				rouletteItems,
+				itemIndex,
+				cancellationToken).ConfigureAwait(false);
 		}
+	}
 
-		var deck = await _shuffleService
-			.ShuffleAsync(command.PromotionId, promotionSettings.CampaignDetail.Items)
-			.ConfigureAwait(false);
-
-		var deckIndex = RandomNumberGenerator.GetInt32(0, deck.Length);
-
-		var itemIndex = deck[deckIndex];
-
-		if (!await _statisticsService.IncrementRouletteItemCountAsync(
-			command.PromotionId,
-			rouletteItems[itemIndex].Id,
-			command.Date,
-			rouletteItems[itemIndex].IsDefault || rouletteItems[itemIndex].DailyWinningLimit == 0
-				? null
-				: rouletteItems[itemIndex].DailyWinningLimit,
-			cancellationToken).ConfigureAwait(false))
-			itemIndex = 0;
-
+	private async Task<(decimal TotalAmount, decimal Bonus, decimal Bucket)> ProcessRouletteResultAsync(
+		RouletteCommand command,
+		RoulettePromotion promotionSettings,
+		RouletteItem[] rouletteItems,
+		int itemIndex,
+		CancellationToken cancellationToken)
+	{
 		var distributeAmount = rouletteItems[itemIndex].Bonus;
 
-		if (await _statisticsService.IncrementTotalDistributeAmountAsync(
+		var (isOver, resultAmount) = await _statisticsService.IncrementTotalDistributeAmountAsync(
 			command.PromotionId,
 			promotionSettings.PromotionLimitAmount,
 			distributeAmount,
 			rouletteItems[0].Bonus,
-			cancellationToken).ConfigureAwait(false) is (false, _))
+			cancellationToken).ConfigureAwait(false);
+
+		if (!isOver)
 		{
 			await _tgsRepository.AddRouletteRecordAsync(
 				command.PromotionId,
@@ -119,12 +131,7 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 				distributeAmount,
 				cancellationToken).ConfigureAwait(false);
 
-			_ = Task.Run(() => _distributeService.ExecuteAsync(new DistributeBonusCommand(
-				command.PromotionId,
-				command.PlayerCode,
-				command.Date,
-				rouletteItems[itemIndex].Bonus,
-				rouletteItems[itemIndex].Bonus * rouletteItems[itemIndex].TurnoverRate), default));
+			return (resultAmount, distributeAmount, rouletteItems[itemIndex].CalculateBucket());
 		}
 		else
 		{
@@ -136,12 +143,33 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 				rouletteItems[0].Bonus,
 				cancellationToken).ConfigureAwait(false);
 
-			_ = Task.Run(() => _distributeService.ExecuteAsync(new DistributeBonusCommand(
-				command.PromotionId,
-				command.PlayerCode,
-				command.Date,
-				rouletteItems[0].Bonus,
-				rouletteItems[0].Bonus * rouletteItems[0].TurnoverRate), default));
+			return (resultAmount, rouletteItems[0].Bonus, rouletteItems[0].CalculateBucket());
 		}
+	}
+
+	private async Task<int> PlayRouletteAsync(
+		RouletteCommand command,
+		RouletteItem[] rouletteItems,
+		CancellationToken cancellationToken)
+	{
+		var pie = await _shuffleService
+			.ShuffleAsync(command.PromotionId, rouletteItems)
+			.ConfigureAwait(false);
+
+		var deckIndex = RandomNumberGenerator.GetInt32(0, pie.Length);
+
+		var itemIndex = pie[deckIndex];
+
+		if (!await _statisticsService.IncrementRouletteItemCountAsync(
+			command.PromotionId,
+			rouletteItems[itemIndex].Id,
+			command.Date,
+			rouletteItems[itemIndex].IsDefault || rouletteItems[itemIndex].DailyWinningLimit == 0
+				? null
+				: rouletteItems[itemIndex].DailyWinningLimit,
+			cancellationToken).ConfigureAwait(false))
+			itemIndex = 0;
+
+		return itemIndex;
 	}
 }

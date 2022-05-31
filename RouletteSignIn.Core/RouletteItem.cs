@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Tgs.RouletteServices;
+﻿namespace Tgs.RouletteServices;
 public record RouletteItem(
 	Guid Id,
 	string Title,
@@ -8,4 +6,7 @@ public record RouletteItem(
 	decimal WinningProbability,
 	decimal TurnoverRate,
 	int DailyWinningLimit,
-	bool IsDefault = false);
+	bool IsDefault = false)
+{
+	public decimal CalculateBucket() => Bonus * TurnoverRate;
+}
