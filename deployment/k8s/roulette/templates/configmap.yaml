@@ -5,6 +5,10 @@ metadata:
 data:
   appsettings.json: |
     {
+      "Roulette": {
+        "PromotionBaseUrl": "http://promotion-api",
+        "PlayerBaseUrl": "http://player-api"
+      }
     }
   monitor.settings.json: |
     {

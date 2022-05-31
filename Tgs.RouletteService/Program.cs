@@ -11,6 +11,9 @@ using Tgs.RouletteService.Repositories.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration
+	.AddJsonFile("/config/appsettings.json", true);
+
 builder.Logging
 	.AddOpenTelemetry(options =>
 	{
