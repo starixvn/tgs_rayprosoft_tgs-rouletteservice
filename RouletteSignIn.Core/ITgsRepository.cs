@@ -4,9 +4,10 @@ public interface ITgsRepository
 {
 	ValueTask<RouletteSignInRecord?> GetRouletteSignInRecordAsync(Guid promotionId, string playerCode, DateOnly date, CancellationToken cancellationToken = default);
 
-	ValueTask AddRouletteRecordAsync(
+	ValueTask<Guid> AddRouletteRecordAsync(
 		Guid promotionId,
 		string playerCode,
+		Guid brandId,
 		DateOnly date,
 		int itemIndex,
 		decimal bonus,

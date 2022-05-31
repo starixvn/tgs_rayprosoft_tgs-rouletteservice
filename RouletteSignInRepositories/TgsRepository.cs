@@ -32,21 +32,15 @@ internal class TgsRepository : ITgsRepository
 			: new RouletteSignInRecord(record.Id, record.PlayerCode, record.Date, record.ItemIndex);
 	}
 
-	public async ValueTask AddRouletteRecordAsync(
+	public async ValueTask<Guid> AddRouletteRecordAsync(
 		Guid promotionId,
 		string playerCode,
+		Guid brandId,
 		DateOnly date,
 		int itemIndex,
 		decimal bonus,
 		CancellationToken cancellationToken = default)
 	{
-		var player = await _dbContext.Players
-			.FindAsync(new object?[] { playerCode }, cancellationToken)
-			.ConfigureAwait(false);
-
-		if (player is null)
-			return;
-
 		var id = await _serialNumberGenerator
 			.GenerateAsync(cancellationToken)
 			.ConfigureAwait(false);
@@ -55,7 +49,7 @@ internal class TgsRepository : ITgsRepository
 		{
 			Id = id,
 			PlayerCode = playerCode,
-			BrandId = player.BrandId,
+			BrandId = brandId,
 			PromotionId = promotionId,
 			ItemIndex = itemIndex,
 			Date = date,
@@ -69,5 +63,7 @@ internal class TgsRepository : ITgsRepository
 		_ = await _dbContext
 			.SaveChangesAsync(cancellationToken)
 			.ConfigureAwait(false);
+
+		return id;
 	}
 }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using ExpectedObjects;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using Tgs.PlayerService.Client;
 using Tgs.Promotion.Clients;
 using Tgs.RouletteServices;
 using Tgs.RouletteServices.ApplicationServices;
@@ -63,18 +64,30 @@ public class RouletteTests
 		var fakeShuffleService = Substitute.For<IShuffleService>();
 		var fakeStatisticsService = Substitute.For<IStatisticsService>();
 		var fakeDistributeService = Substitute.For<ICommandService<DistributeBonusCommand>>();
+		var fakePromotionServiceClient = Substitute.For<IPromotionServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
 		var sut = new RouletteCommandService(
 			fakeTgsRepository,
 			fakeGetRoulettePromotionService,
 			fakeShuffleService,
 			fakeStatisticsService,
-			fakeDistributeService);
+			fakeDistributeService,
+			fakePromotionServiceClient,
+			fakePlayerServiceClient);
 
 		var command = new RouletteCommand(
 			Guid.NewGuid(),
 			"player1",
 			DateOnly.FromDateTime(DateTime.Now));
+
+		_ = fakePlayerServiceClient
+			.GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
+			.Returns(new PlayerInfo
+			{
+				PlayerCode = command.PlayerCode,
+				BrandId = Guid.NewGuid()
+			});		
 
 		_ = fakeGetRoulettePromotionService.GetAsync(
 			Arg.Is<GetRoulettePromotionSettingsQuery>(cmd => cmd.PromotionId == command.PromotionId))
@@ -125,6 +138,7 @@ public class RouletteTests
 			.AddRouletteRecordAsync(
 				Arg.Is(command.PromotionId),
 				Arg.Is(command.PlayerCode),
+				Arg.Any<Guid>(),
 				Arg.Is(command.Date),
 				Arg.Any<int>(),
 				Arg.Any<decimal>());
@@ -148,18 +162,30 @@ public class RouletteTests
 		var fakeShuffleService = Substitute.For<IShuffleService>();
 		var fakeStatisticsService = Substitute.For<IStatisticsService>();
 		var fakeDistributeService = Substitute.For<ICommandService<DistributeBonusCommand>>();
+		var fakePromotionServiceClient = Substitute.For<IPromotionServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
 		var sut = new RouletteCommandService(
 			fakeTgsRepository,
 			fakeGetRoulettePromotionService,
 			fakeShuffleService,
 			fakeStatisticsService,
-			fakeDistributeService);
+			fakeDistributeService,
+			fakePromotionServiceClient,
+			fakePlayerServiceClient);
 
 		var command = new RouletteCommand(
 			Guid.NewGuid(),
 			"player1",
 			DateOnly.FromDateTime(DateTime.Now));
+
+		_ = fakePlayerServiceClient
+			.GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
+			.Returns(new PlayerInfo
+			{
+				PlayerCode = command.PlayerCode,
+				BrandId = Guid.NewGuid()
+			});
 
 		_ = fakeTgsRepository.GetRouletteSignInRecordAsync(
 			Arg.Is(command.PromotionId),
@@ -177,6 +203,7 @@ public class RouletteTests
 			.AddRouletteRecordAsync(
 				Arg.Is(command.PromotionId),
 				Arg.Any<string>(),
+				Arg.Any<Guid>(),
 				Arg.Any<DateOnly>(),
 				Arg.Any<int>(),
 				Arg.Any<decimal>());
@@ -190,13 +217,54 @@ public class RouletteTests
 		var fakeShuffleService = Substitute.For<IShuffleService>();
 		var fakeStatisticsService = Substitute.For<IStatisticsService>();
 		var fakeDistributeService = Substitute.For<ICommandService<DistributeBonusCommand>>();
+		var fakePromotionServiceClient = Substitute.For<IPromotionServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
 		var sut = new RouletteCommandService(
 			fakeTgsRepository,
 			fakeGetRoulettePromotionService,
 			fakeShuffleService,
 			fakeStatisticsService,
-			fakeDistributeService);
+			fakeDistributeService,
+			fakePromotionServiceClient,
+			fakePlayerServiceClient);
+
+		var command = new RouletteCommand(
+			Guid.NewGuid(),
+			"player1",
+			DateOnly.FromDateTime(DateTime.Now));
+
+		_ = fakePlayerServiceClient
+			.GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
+			.Returns(new PlayerInfo
+			{
+				PlayerCode = command.PlayerCode,
+				BrandId = Guid.NewGuid()
+			});		
+
+		_ = await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+			async () => await sut.ExecuteAsync(command));
+	}
+
+	[TestMethod]
+	public async Task If_Not_Found_PlayerInfo_Will_Throw_Exception()
+	{
+		var fakeTgsRepository = Substitute.For<ITgsRepository>();
+		var fakeGetRoulettePromotionService = Substitute.For<IGetService<GetRoulettePromotionSettingsQuery, RoulettePromotion?>>();
+		var fakeShuffleService = Substitute.For<IShuffleService>();
+		var fakeStatisticsService = Substitute.For<IStatisticsService>();
+		var fakeDistributeService = Substitute.For<ICommandService<DistributeBonusCommand>>();
+		var fakePromotionServiceClient = Substitute.For<IPromotionServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
+
+		var sut = new RouletteCommandService(
+			fakeTgsRepository,
+			fakeGetRoulettePromotionService,
+			fakeShuffleService,
+			fakeStatisticsService,
+			fakeDistributeService,
+			fakePromotionServiceClient,
+			fakePlayerServiceClient);
 
 		var command = new RouletteCommand(
 			Guid.NewGuid(),
@@ -215,13 +283,17 @@ public class RouletteTests
 		var fakeShuffleService = Substitute.For<IShuffleService>();
 		var fakeStatisticsService = Substitute.For<IStatisticsService>();
 		var fakeDistributeService = Substitute.For<ICommandService<DistributeBonusCommand>>();
+		var fakePromotionServiceClient = Substitute.For<IPromotionServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
 		var sut = new RouletteCommandService(
 			fakeTgsRepository,
 			fakeGetRoulettePromotionService,
 			fakeShuffleService,
 			fakeStatisticsService,
-			fakeDistributeService);
+			fakeDistributeService,
+			fakePromotionServiceClient,
+			fakePlayerServiceClient);
 
 		var command = new RouletteCommand(
 			Guid.NewGuid(),
@@ -247,18 +319,30 @@ public class RouletteTests
 		var fakeShuffleService = Substitute.For<IShuffleService>();
 		var fakeStatisticsService = Substitute.For<IStatisticsService>();
 		var fakeDistributeService = Substitute.For<ICommandService<DistributeBonusCommand>>();
+		var fakePromotionServiceClient = Substitute.For<IPromotionServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
 		var sut = new RouletteCommandService(
 			fakeTgsRepository,
 			fakeGetRoulettePromotionService,
 			fakeShuffleService,
 			fakeStatisticsService,
-			fakeDistributeService);
+			fakeDistributeService,
+			fakePromotionServiceClient,
+			fakePlayerServiceClient);
 
 		var command = new RouletteCommand(
 			Guid.NewGuid(),
 			"player1",
 			DateOnly.FromDateTime(DateTime.Now));
+
+		_ = fakePlayerServiceClient
+			.GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
+			.Returns(new PlayerInfo
+			{
+				PlayerCode = command.PlayerCode,
+				BrandId = Guid.NewGuid()
+			});
 
 		_ = fakeGetRoulettePromotionService.GetAsync(
 			Arg.Is<GetRoulettePromotionSettingsQuery>(cmd => cmd.PromotionId == command.PromotionId))
@@ -300,6 +384,7 @@ public class RouletteTests
 			.AddRouletteRecordAsync(
 				Arg.Is(command.PromotionId),
 				Arg.Is(command.PlayerCode),
+				Arg.Any<Guid>(),
 				Arg.Is(command.Date),
 				Arg.Is(0),
 				Arg.Is(8M));
@@ -320,18 +405,30 @@ public class RouletteTests
 		var fakeShuffleService = Substitute.For<IShuffleService>();
 		var fakeStatisticsService = Substitute.For<IStatisticsService>();
 		var fakeDistributeService = Substitute.For<ICommandService<DistributeBonusCommand>>();
+		var fakePromotionServiceClient = Substitute.For<IPromotionServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
 		var sut = new RouletteCommandService(
 			fakeTgsRepository,
 			fakeGetRoulettePromotionService,
 			fakeShuffleService,
 			fakeStatisticsService,
-			fakeDistributeService);
+			fakeDistributeService,
+			fakePromotionServiceClient,
+			fakePlayerServiceClient);
 
 		var command = new RouletteCommand(
 			Guid.NewGuid(),
 			"player1",
 			DateOnly.FromDateTime(DateTime.Now));
+
+		_ = fakePlayerServiceClient
+			.GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
+			.Returns(new PlayerInfo
+			{
+				PlayerCode = command.PlayerCode,
+				BrandId = Guid.NewGuid()
+			});
 
 		_ = fakeGetRoulettePromotionService.GetAsync(
 			Arg.Is<GetRoulettePromotionSettingsQuery>(cmd => cmd.PromotionId == command.PromotionId))
@@ -382,6 +479,7 @@ public class RouletteTests
 			.AddRouletteRecordAsync(
 				Arg.Is(command.PromotionId),
 				Arg.Is(command.PlayerCode),
+				Arg.Any<Guid>(),
 				Arg.Is(command.Date),
 				Arg.Is(0),
 				Arg.Is(8M));
@@ -395,18 +493,30 @@ public class RouletteTests
 		var fakeShuffleService = Substitute.For<IShuffleService>();
 		var fakeStatisticsService = Substitute.For<IStatisticsService>();
 		var fakeDistributeService = Substitute.For<ICommandService<DistributeBonusCommand>>();
+		var fakePromotionServiceClient = Substitute.For<IPromotionServiceClient>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
 		var sut = new RouletteCommandService(
 			fakeTgsRepository,
 			fakeGetRoulettePromotionService,
 			fakeShuffleService,
 			fakeStatisticsService,
-			fakeDistributeService);
+			fakeDistributeService,
+			fakePromotionServiceClient,
+			fakePlayerServiceClient);
 
 		var command = new RouletteCommand(
 			Guid.NewGuid(),
 			"player1",
 			DateOnly.FromDateTime(DateTime.Now));
+
+		_ = fakePlayerServiceClient
+			.GetPlayerInfoAsync(Arg.Is(command.PlayerCode))
+			.Returns(new PlayerInfo
+			{
+				PlayerCode = command.PlayerCode,
+				BrandId = Guid.NewGuid()
+			});		
 
 		_ = fakeGetRoulettePromotionService.GetAsync(
 			Arg.Is<GetRoulettePromotionSettingsQuery>(cmd => cmd.PromotionId == command.PromotionId))
@@ -457,6 +567,7 @@ public class RouletteTests
 			.AddRouletteRecordAsync(
 				Arg.Is(command.PromotionId),
 				Arg.Is(command.PlayerCode),
+				Arg.Any<Guid>(),
 				Arg.Is(command.Date),
 				Arg.Is(0),
 				Arg.Is(8M));

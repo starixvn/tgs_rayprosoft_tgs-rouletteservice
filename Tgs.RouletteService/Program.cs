@@ -44,6 +44,8 @@ builder.Services
 		})
 	.AddPromotionClientServices((options, _) =>
 		options.Url = builder.Configuration.GetValue<Uri>("Roulette:PromotionBaseUrl"))
+	.AddPlayerServiceClient((options, _) =>
+		options.BaseUrl = builder.Configuration.GetValue<Uri>("Roulette:PlayerBaseUrl"))
 	.AddMessageQueue()
 	.AddNatsMessageQueue(natsConfiguration => natsConfiguration
 		.ConfigQueueOptions((options, sp) =>

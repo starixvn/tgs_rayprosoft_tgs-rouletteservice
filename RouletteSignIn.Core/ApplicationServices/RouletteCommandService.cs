@@ -1,4 +1,6 @@
 ﻿using System.Security.Cryptography;
+using Tgs.PlayerService.Client;
+using Tgs.Promotion.Clients;
 using Tgs.ServiceUtility;
 
 namespace Tgs.RouletteServices.ApplicationServices;
@@ -13,19 +15,25 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 	private readonly IShuffleService _shuffleService;
 	private readonly IStatisticsService _statisticsService;
 	private readonly DistributeService _distributeService;
+	private readonly IPromotionServiceClient _promotionServiceClient;
+	private readonly IPlayerServiceClient _playerServiceClient;
 
 	public RouletteCommandService(
 		ITgsRepository tgsRepository,
 		GetRoulettePromotionService getRoulettePromotionService,
 		IShuffleService shuffleService,
 		IStatisticsService statisticsService,
-		DistributeService distributeService)
+		DistributeService distributeService,
+		IPromotionServiceClient promotionServiceClient,
+		IPlayerServiceClient playerServiceClient)
 	{
 		_tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
 		_getRoulettePromotionService = getRoulettePromotionService ?? throw new ArgumentNullException(nameof(getRoulettePromotionService));
 		_shuffleService = shuffleService ?? throw new ArgumentNullException(nameof(shuffleService));
 		_statisticsService = statisticsService ?? throw new ArgumentNullException(nameof(statisticsService));
 		_distributeService = distributeService ?? throw new ArgumentNullException(nameof(distributeService));
+		_promotionServiceClient = promotionServiceClient ?? throw new ArgumentNullException(nameof(promotionServiceClient));
+		_playerServiceClient = playerServiceClient ?? throw new ArgumentNullException(nameof(playerServiceClient));
 	}
 
 	public async ValueTask ExecuteAsync(RouletteCommand command, CancellationToken cancellationToken = default)
@@ -38,6 +46,13 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 
 		if (currentRecord is not null)
 			return;
+
+		var player = await _playerServiceClient
+			.GetPlayerInfoAsync(command.PlayerCode, cancellationToken)
+			.ConfigureAwait(false);
+
+		if (player is null)
+			throw new InvalidOperationException($"Can't find player with code {command.PlayerCode}");
 
 		var promotionSettings = await _getRoulettePromotionService.GetAsync(
 			new GetRoulettePromotionSettingsQuery(command.PromotionId),
@@ -53,27 +68,35 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 
 		var rouletteItems = promotionSettings.CampaignDetail.Items.ToArray();
 
-		var (totalAmount, bonus, bucket) = await ProcessRouletteAsync(
+		var (recordId, totalAmount, bonus, bucket) = await ProcessRouletteAsync(
 			command,
 			promotionSettings,
 			rouletteItems,
+			player.BrandId,
 			cancellationToken).ConfigureAwait(false);
 
-		_ = Task.Run(() =>
+		_ = Task.Run(async () =>
 		{
-			return _distributeService.ExecuteAsync(new DistributeBonusCommand(
+			await _promotionServiceClient.UpdatePromotionUsedAmountAsync(
+				command.PromotionId,
+				totalAmount,
+				recordId,
+				default).ConfigureAwait(false);
+
+			await _distributeService.ExecuteAsync(new DistributeBonusCommand(
 				command.PromotionId,
 				command.PlayerCode,
 				command.Date,
 				bonus,
-				bucket), default);
+				bucket), default).ConfigureAwait(false);
 		});
 	}
 
-	private async Task<(decimal TotalAmount, decimal Bonus, decimal Bucket)> ProcessRouletteAsync(
+	private async Task<(Guid RecordId, decimal TotalAmount, decimal Bonus, decimal Bucket)> ProcessRouletteAsync(
 		RouletteCommand command,
 		RoulettePromotion promotionSettings,
 		RouletteItem[] rouletteItems,
+		Guid brandId,
 		CancellationToken cancellationToken)
 	{
 		if (promotionSettings.PromotionLimitAmount is not null
@@ -86,6 +109,7 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 				command,
 				promotionSettings,
 				rouletteItems,
+				brandId,
 				0,
 				cancellationToken).ConfigureAwait(false);
 		}
@@ -100,15 +124,17 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 				command,
 				promotionSettings,
 				rouletteItems,
+				brandId,
 				itemIndex,
 				cancellationToken).ConfigureAwait(false);
 		}
 	}
 
-	private async Task<(decimal TotalAmount, decimal Bonus, decimal Bucket)> ProcessRouletteResultAsync(
+	private async Task<(Guid RecordId, decimal TotalAmount, decimal Bonus, decimal Bucket)> ProcessRouletteResultAsync(
 		RouletteCommand command,
 		RoulettePromotion promotionSettings,
 		RouletteItem[] rouletteItems,
+		Guid brandId,
 		int itemIndex,
 		CancellationToken cancellationToken)
 	{
@@ -123,27 +149,29 @@ internal class RouletteCommandService : ICommandService<RouletteCommand>
 
 		if (!isOver)
 		{
-			await _tgsRepository.AddRouletteRecordAsync(
+			var recordId = await _tgsRepository.AddRouletteRecordAsync(
 				command.PromotionId,
 				command.PlayerCode,
+				brandId,
 				command.Date,
 				itemIndex,
 				distributeAmount,
 				cancellationToken).ConfigureAwait(false);
 
-			return (resultAmount, distributeAmount, rouletteItems[itemIndex].CalculateBucket());
+			return (recordId, resultAmount, distributeAmount, rouletteItems[itemIndex].CalculateBucket());
 		}
 		else
 		{
-			await _tgsRepository.AddRouletteRecordAsync(
+			var recordId = await _tgsRepository.AddRouletteRecordAsync(
 				command.PromotionId,
 				command.PlayerCode,
+				brandId,
 				command.Date,
 				0,
 				rouletteItems[0].Bonus,
 				cancellationToken).ConfigureAwait(false);
 
-			return (resultAmount, rouletteItems[0].Bonus, rouletteItems[0].CalculateBucket());
+			return (recordId, resultAmount, rouletteItems[0].Bonus, rouletteItems[0].CalculateBucket());
 		}
 	}
 
