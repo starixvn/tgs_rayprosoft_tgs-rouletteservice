@@ -149,9 +149,6 @@ public class RouletteTests
 				Arg.Is(default(decimal?)),
 				Arg.Any<decimal>(),
 				Arg.Is(8M));
-
-		_ = fakeDistributeService.Received(1)
-			.ExecuteAsync(Arg.Any<DistributeBonusCommand>());
 	}
 
 	[TestMethod]
