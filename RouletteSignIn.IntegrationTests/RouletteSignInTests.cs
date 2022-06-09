@@ -4,7 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Tgs.MessageQueue;
+using Tgs.PlayerService.Client;
+using Tgs.Promotion.Clients;
 using Tgs.RouletteService.MessageQueue;
+using Tgs.RouletteServices;
 using Tgs.RouletteServices.Clients;
 using Tgs.RouletteServices.Repositories.Entities;
 
@@ -62,7 +65,6 @@ public class RouletteSignInTests
 		Assert.AreEqual(1, actual?.ItemIndex);
 	}
 
-
 	[TestMethod]
 	public async Task Get_Roulette_Record_Not_Found_Will_Return_Nil()
 	{
@@ -102,8 +104,15 @@ public class RouletteSignInTests
 	public async Task Roulette()
 	{
 		var fakeMessageSender = Substitute.For<IMessageSender>();
+		var fakePromotionServiceClient = Substitute.For<IPromotionServiceClient>();
+		var fakeStatisticsRepository = Substitute.For<IStatisticsRepository>();
+		var fakePlayerServiceClient = Substitute.For<IPlayerServiceClient>();
 
-		await using var web = new TestRouletteSignInApplication();
+		await using var web = new TestRouletteSignInApplication(builder => builder
+			.ConfigureServices(services => services
+				.AddSingleton(fakePromotionServiceClient)
+				.AddSingleton(fakeStatisticsRepository)
+				.AddSingleton(fakePlayerServiceClient)));
 
 		var sut = new RouletteSignInClient(fakeMessageSender);
 
@@ -111,6 +120,77 @@ public class RouletteSignInTests
 		var brandId = Guid.NewGuid();
 		var date = DateOnly.FromDateTime(DateTime.Now);
 		var playerCode = "tester";
+
+		_ = fakePlayerServiceClient.GetPlayerInfoAsync(Arg.Is(playerCode))
+			.Returns(new PlayerInfo
+			{
+				PlayerCode = playerCode,
+				BrandId = brandId
+			});
+
+		_ = fakePromotionServiceClient.GetPromotionMainInfoAsync(Arg.Is(promotionId))
+			.Returns(new PromotionMainInfo
+			{
+				Id = promotionId,
+				EventDuring = (DateTime.UtcNow.AddDays(-10D), DateTime.UtcNow.AddDays(10D)),
+				IsAutoSent = true,
+				Name = "Test Roulette",
+				PromotionLimitAmount = null,
+				PromotionType = "Roulette"
+			});
+
+		_ = fakePromotionServiceClient.GetPromotionRuleAsync<RouletteSettings>(Arg.Is(promotionId))
+			.Returns(new RouletteSettings(
+				new[] {
+					new RouletteItem(
+						Guid.NewGuid(),
+						"送8元",
+						8M,
+						0.8M,
+						2M,
+						0,
+						true),
+					new RouletteItem(
+						Guid.NewGuid(),
+						"送18元",
+						18M,
+						0.1M,
+						10M,
+						50,
+						false),
+					new RouletteItem(
+						Guid.NewGuid(),
+						"送28元",
+						28M,
+						0.05M,
+						20M,
+						20,
+						false),
+					new RouletteItem(
+						Guid.NewGuid(),
+						"送88元",
+						88M,
+						0.04M,
+						20M,
+						10,
+						false),
+					new RouletteItem(
+						Guid.NewGuid(),
+						"送188元",
+						188M,
+						0.04M,
+						20M,
+						10,
+						false),
+					new RouletteItem(
+						Guid.NewGuid(),
+						"送1888元",
+						1888M,
+						0.01M,
+						1M,
+						1,
+						false)
+				}));
 
 		await using var serviceScope = web.Services.CreateAsyncScope();
 
@@ -144,14 +224,18 @@ public class RouletteSignInTests
 
 		Assert.IsNotNull(actual);
 		Assert.AreNotEqual(Guid.Empty, actual.Id);
+		Assert.IsTrue(actual.ItemIndex is >= 0 and < 6, "中獎項目需在範圍內");
 	}
 
 	[TestMethod]
 	public async Task Already_Roulette_Will_Return_Exists_Data()
 	{
 		var fakeMessageSender = Substitute.For<IMessageSender>();
+		var fakeStatisticsRepository = Substitute.For<IStatisticsRepository>();
 
-		await using var web = new TestRouletteSignInApplication();
+		await using var web = new TestRouletteSignInApplication(builder => builder
+			.ConfigureServices(services => services
+				.AddSingleton(fakeStatisticsRepository)));
 
 		var sut = new RouletteSignInClient(fakeMessageSender);
 

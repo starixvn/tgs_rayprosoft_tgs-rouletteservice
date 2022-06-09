@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <RootNamespace>Tgs.RouletteServices.Clients</RootNamespace>
     <PackageId>Tgs.RouletteSignInClient</PackageId>
-    <Version>0.0.1</Version>
+    <Version>0.0.3</Version>
     <Authors>Raypro</Authors>
     <Product>Tgs.RouletteSignInClient</Product>
     <PackageProjectUrl>https://gitlab.com/rayprosoft/tgs-rouletteservice</PackageProjectUrl>
@@ -15,8 +15,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="3.20.1" />
-    <PackageReference Include="Grpc.Tools" Version="2.45.0">
+    <PackageReference Include="Google.Protobuf" Version="3.21.1" />
+    <PackageReference Include="Grpc.Tools" Version="2.46.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -25,11 +25,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="PhoenixToolkits.Protobuf.ExtendTypes" Version="0.0.6" />
-    <PackageReference Include="Tgs.MessageQueue.Nats" Version="2.1.5" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Protos\" />
+    <PackageReference Include="Tgs.MessageQueue.Nats" Version="2.1.6" />
   </ItemGroup>
 
   <ItemGroup>

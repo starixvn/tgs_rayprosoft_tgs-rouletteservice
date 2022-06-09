@@ -14,6 +14,7 @@ namespace Tgs.RouletteServices.Repositories.Entities
         public int ItemIndex { get; set; }
         public string PlayerCode { get; set; } = null!;
         public Guid PromotionId { get; set; }
+        public decimal Bonus { get; set; }
 
         public virtual Player PlayerCodeNavigation { get; set; } = null!;
     }

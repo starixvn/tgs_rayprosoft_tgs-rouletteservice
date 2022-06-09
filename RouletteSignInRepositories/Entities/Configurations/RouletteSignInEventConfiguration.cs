@@ -26,6 +26,10 @@ namespace Tgs.RouletteServices.Repositories.Entities.Configurations
                 .ValueGeneratedNever()
                 .HasColumnName("id");
 
+            entity.Property(e => e.Bonus)
+                .HasPrecision(18, 6)
+                .HasColumnName("bonus");
+
             entity.Property(e => e.BrandId).HasColumnName("brand_id");
 
             entity.Property(e => e.CreatedOn)

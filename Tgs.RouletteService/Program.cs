@@ -5,10 +5,14 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Tgs.RouletteService;
 using Tgs.RouletteService.MessageQueue;
 using Tgs.RouletteService.Repositories.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration
+	.AddJsonFile("/config/appsettings.json", true);
 
 builder.Logging
 	.AddOpenTelemetry(options =>
@@ -25,13 +29,26 @@ builder.Logging
 	});
 
 builder.Services
+	.AddSingleton(sp => new RedisConnectionManager(
+		builder.Configuration.GetConnectionString("Redis")))
 	.AddRouletteSignInEvents()
-	.AddRouletteSignInEventRepositories((sp, dbBuilder) =>
-	{
-		var config = sp.GetRequiredService<IConfiguration>();
+	.AddRouletteSignInEventRepositories(
+		(sp, dbBuilder) =>
+		{
+			var config = sp.GetRequiredService<IConfiguration>();
 
-		_ = dbBuilder.UseNpgsql(config.GetConnectionString("Tgs"));
-	})
+			_ = dbBuilder.UseNpgsql(config.GetConnectionString("Tgs"));
+		},
+		sp =>
+		{
+			var mgr = sp.GetRequiredService<RedisConnectionManager>();
+
+			return mgr.Database;
+		})
+	.AddPromotionClientServices((options, _) =>
+		options.Url = builder.Configuration.GetValue<Uri>("Roulette:PromotionBaseUrl"))
+	.AddPlayerServiceClient((options, _) =>
+		options.BaseUrl = builder.Configuration.GetValue<Uri>("Roulette:PlayerBaseUrl"))
 	.AddMessageQueue()
 	.AddNatsMessageQueue(natsConfiguration => natsConfiguration
 		.ConfigQueueOptions((options, sp) =>
@@ -41,13 +58,14 @@ builder.Services
 			options.Url = config.GetConnectionString("Nats");
 		})
 		.AddProcessor<RouletteSignInProcessor>("tgs.roulette.daily", "tgs.roulette.daily")
-		.AddProcessor<RouletteQueryProcessor>("tgs.roulette.daily.query", "tgs.roulette.daily.query"))
+		.AddProcessor<RouletteQueryProcessor>("tgs.roulette.daily.query", "tgs.roulette.daily.query")
+		.AddProcessor<RouletteSettingProcessor>("tgs.promotion.roulette.setting", "tgs.promotion.roulette.setting"))
 	.AddNatsGlobPatternExchange("*");
 
 builder.Services
 	 .AddSingleton<IConfigureOptions<OtlpExporterOptions>>(
 		sp => new ConfigureNamedOptions<OtlpExporterOptions>(
-			Microsoft.Extensions.Options.Options.DefaultName,
+			Options.DefaultName,
 			exporterOptions =>
 			{
 				var config = sp.GetRequiredService<IConfiguration>();

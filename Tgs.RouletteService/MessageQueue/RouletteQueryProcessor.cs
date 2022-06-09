@@ -25,7 +25,7 @@ public class RouletteQueryProcessor : IMessageProcessor
 			.GetAsync(new GetRouletteRecordQuery(
 				request.PromotionId,
 				request.PlayerCode,
-				request.Date))
+				request.Date), cancellationToken)
 			.ConfigureAwait(false);
 
 		return signRecord is null
