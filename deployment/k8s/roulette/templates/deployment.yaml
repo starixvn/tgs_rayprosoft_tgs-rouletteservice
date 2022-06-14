@@ -52,6 +52,11 @@ spec:
                 secretKeyRef:
                   name: tgs-connections
                   key: tgs
+            - name: ConnectionStrings__Redis
+              valueFrom:
+                secretKeyRef:
+                  name: tgs-connections
+                  key: redis
             - name: DOTNET_DiagnosticPorts
               value: /diag/port
           ports:
