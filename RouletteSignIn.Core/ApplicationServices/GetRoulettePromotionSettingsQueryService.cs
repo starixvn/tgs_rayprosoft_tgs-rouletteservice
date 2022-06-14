@@ -36,7 +36,7 @@ internal class GetRoulettePromotionSettingsQueryService : IGetService<GetRoulett
 				rule.CompaignDetail);
 	}
 
-	private class PromotionRule
+	internal class PromotionRule
 	{
 		public RouletteSettings CompaignDetail { get; init; } = default!;
 	}
