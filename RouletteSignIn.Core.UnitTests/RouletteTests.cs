@@ -9,6 +9,7 @@ using Tgs.Promotion.Clients;
 using Tgs.RouletteServices;
 using Tgs.RouletteServices.ApplicationServices;
 using Tgs.ServiceUtility;
+using static Tgs.RouletteServices.ApplicationServices.GetRoulettePromotionSettingsQueryService;
 
 namespace RouletteSignIn.Core.UnitTests;
 
@@ -591,10 +592,13 @@ public class RouletteTests
 			});
 
 		var rouletteItemId = Guid.NewGuid();
-		_ = fakePromotionServiceClient.GetPromotionRuleAsync<RouletteSettings>(Arg.Is(query.PromotionId))
-			.Returns(new RouletteSettings(new[] {
-				new RouletteItem(rouletteItemId, "Test1", 100M, 0.1M, 10M, 0, true)
-			}));
+		_ = fakePromotionServiceClient.GetPromotionRuleAsync<PromotionRule>(Arg.Is(query.PromotionId))
+			.Returns(new PromotionRule
+			{
+				CompaignDetail = new RouletteSettings(new[] {
+					new RouletteItem(rouletteItemId, "Test1", 100M, 0.1M, 10M, 0, true)
+				})
+			});
 
 		var expected = new RoulettePromotion(
 			query.PromotionId,

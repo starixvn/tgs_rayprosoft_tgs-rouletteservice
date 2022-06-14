@@ -10,6 +10,7 @@ using Tgs.RouletteService.MessageQueue;
 using Tgs.RouletteServices;
 using Tgs.RouletteServices.Clients;
 using Tgs.RouletteServices.Repositories.Entities;
+using static Tgs.RouletteServices.ApplicationServices.GetRoulettePromotionSettingsQueryService;
 
 namespace RouletteSignIn.InntegrationTests;
 
@@ -139,8 +140,10 @@ public class RouletteSignInTests
 				PromotionType = "Roulette"
 			});
 
-		_ = fakePromotionServiceClient.GetPromotionRuleAsync<RouletteSettings>(Arg.Is(promotionId))
-			.Returns(new RouletteSettings(
+		_ = fakePromotionServiceClient.GetPromotionRuleAsync<PromotionRule>(Arg.Is(promotionId))
+			.Returns(new PromotionRule
+			{
+				CompaignDetail = new RouletteSettings(
 				new[] {
 					new RouletteItem(
 						Guid.NewGuid(),
@@ -190,7 +193,8 @@ public class RouletteSignInTests
 						1M,
 						1,
 						false)
-				}));
+				})
+			});
 
 		await using var serviceScope = web.Services.CreateAsyncScope();
 
