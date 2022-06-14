@@ -24,15 +24,20 @@ internal class GetRoulettePromotionSettingsQueryService : IGetService<GetRoulett
 		if (mainInfo.PromotionType != "Roulette")
 			throw new InvalidOperationException($"Promotion with id {query.PromotionId} is not a roulette promotion");
 
-		var settings = await _promotionServiceClient
-			.GetPromotionRuleAsync<RouletteSettings>(query.PromotionId, cancellationToken)
+		var rule = await _promotionServiceClient
+			.GetPromotionRuleAsync<PromotionRule>(query.PromotionId, cancellationToken)
 			.ConfigureAwait(false);
 
-		return settings is null
+		return rule is null
 			? throw new InvalidOperationException("Roulette settings is null")
 			: new RoulettePromotion(
-			mainInfo.Id,
-			mainInfo.PromotionLimitAmount,
-			settings);
+				mainInfo.Id,
+				mainInfo.PromotionLimitAmount,
+				rule.CompaignDetail);
+	}
+
+	private class PromotionRule
+	{
+		public RouletteSettings CompaignDetail { get; init; } = default!;
 	}
 }
