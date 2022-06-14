@@ -87,7 +87,7 @@ public class RouletteTests
 			{
 				PlayerCode = command.PlayerCode,
 				BrandId = Guid.NewGuid()
-			});		
+			});
 
 		_ = fakeGetRoulettePromotionService.GetAsync(
 			Arg.Is<GetRoulettePromotionSettingsQuery>(cmd => cmd.PromotionId == command.PromotionId))
@@ -237,7 +237,7 @@ public class RouletteTests
 			{
 				PlayerCode = command.PlayerCode,
 				BrandId = Guid.NewGuid()
-			});		
+			});
 
 		_ = await Assert.ThrowsExceptionAsync<InvalidOperationException>(
 			async () => await sut.ExecuteAsync(command));
@@ -513,7 +513,7 @@ public class RouletteTests
 			{
 				PlayerCode = command.PlayerCode,
 				BrandId = Guid.NewGuid()
-			});		
+			});
 
 		_ = fakeGetRoulettePromotionService.GetAsync(
 			Arg.Is<GetRoulettePromotionSettingsQuery>(cmd => cmd.PromotionId == command.PromotionId))
