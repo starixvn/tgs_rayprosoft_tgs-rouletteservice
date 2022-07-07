@@ -18,7 +18,7 @@ internal class StatisticsRepository : IStatisticsRepository
 	public async ValueTask<decimal> IncrementTotalDistributeAmountAsync(Guid promotionId, decimal amount, CancellationToken cancellationToken = default)
 	{
 		var returnAmount = await _redisDatabase
-			.StringIncrementAsync($"{_Prefix};Total:{promotionId}", (long)Math.Floor(amount * _ExchangeRate))
+			.StringIncrementAsync($"{_Prefix}:Total:{promotionId}", (long)Math.Floor(amount * _ExchangeRate))
 			.ConfigureAwait(false);
 
 		return returnAmount / _ExchangeRate;
@@ -27,7 +27,7 @@ internal class StatisticsRepository : IStatisticsRepository
 	public async ValueTask<decimal> DecreaseTotalDistributeAmountAsync(Guid promotionId, decimal amount, CancellationToken cancellationToken = default)
 	{
 		var returnAmount = await _redisDatabase
-			.StringDecrementAsync($"{_Prefix};Total:{promotionId}", (long)Math.Floor(amount * _ExchangeRate))
+			.StringDecrementAsync($"{_Prefix}:Total:{promotionId}", (long)Math.Floor(amount * _ExchangeRate))
 			.ConfigureAwait(false);
 
 		return returnAmount / _ExchangeRate;
