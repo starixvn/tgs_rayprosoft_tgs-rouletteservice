@@ -6,7 +6,7 @@ pipeline {
 	
 	environment {
 		BuildConfiguration = 'Debug'
-		ImageName = "harbor.rpgp.cc/tgs/roulette-sign-in"
+		ImageName = "pgtgs/roulette-sign-in"
 	}
 
 	stages {
