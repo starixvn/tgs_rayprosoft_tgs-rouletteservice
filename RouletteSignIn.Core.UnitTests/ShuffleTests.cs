@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Tgs.RouletteServices;
@@ -66,5 +67,67 @@ public class ShuffleTests
 		var deck = await sut.ShuffleAsync(Guid.NewGuid(), rouletteItems);
 
 		Assert.AreEqual(100, deck.Length);
+	}
+
+	[TestMethod]
+	public async Task Shuffle_Default_WinningProbability_Is_Zero()
+	{
+		var sut = new ShuffleService();
+
+		var rouletteItems = new[]{
+			new RouletteItem(
+				Guid.NewGuid(),
+				"送8元",
+				8M,
+				0M,
+				2M,
+				0,
+				true),
+			new RouletteItem(
+				Guid.NewGuid(),
+				"送18元",
+				18M,
+				0.8M,
+				10M,
+				50,
+				false),
+			new RouletteItem(
+				Guid.NewGuid(),
+				"送28元",
+				28M,
+				0.1M,
+				20M,
+				20,
+				false),
+			new RouletteItem(
+				Guid.NewGuid(),
+				"送88元",
+				88M,
+				0.05M,
+				20M,
+				10,
+				false),
+			new RouletteItem(
+				Guid.NewGuid(),
+				"送188元",
+				188M,
+				0.04M,
+				20M,
+				10,
+				false),
+			new RouletteItem(
+				Guid.NewGuid(),
+				"送1888元",
+				1888M,
+				0.01M,
+				1M,
+				1,
+				false)
+		};
+
+		var deck = await sut.ShuffleAsync(Guid.NewGuid(), rouletteItems);
+
+		Assert.AreEqual(100, deck.Length);
+		Assert.AreEqual(0, deck.Where(n => n == 0).Count());
 	}
 }

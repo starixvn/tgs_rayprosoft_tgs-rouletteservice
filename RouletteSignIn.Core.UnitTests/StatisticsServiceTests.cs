@@ -40,7 +40,34 @@ public class StatisticsServiceTests
 			.IncrementTotalDistributeAmountAsync(Arg.Is(promotionId), Arg.Is(20M))
 			.Returns(110M);
 
-		var (isOver, resultAmount) = await sut.IncrementTotalDistributeAmountAsync(promotionId, 100M, 20M, 10M);
+		var (isOver, resultAmount) = await sut.IncrementTotalDistributeAmountAsync(
+			promotionId,
+			100M,
+			20M,
+			10M);
+
+		Assert.IsFalse(isOver);
+		Assert.AreEqual(110M, resultAmount);
+	}
+
+	[TestMethod]
+	public async Task IncrementTotalDistributeAmount_Without_Limit_Setting()
+	{
+		var fakeStatisticsRepository = Substitute.For<IStatisticsRepository>();
+
+		var sut = new StatisticsService(fakeStatisticsRepository);
+
+		var promotionId = Guid.NewGuid();
+
+		_ = fakeStatisticsRepository
+			.IncrementTotalDistributeAmountAsync(Arg.Is(promotionId), Arg.Is(20M))
+			.Returns(110M);
+
+		var (isOver, resultAmount) = await sut.IncrementTotalDistributeAmountAsync(
+			promotionId,
+			null,
+			20M,
+			10M);
 
 		Assert.IsFalse(isOver);
 		Assert.AreEqual(110M, resultAmount);
