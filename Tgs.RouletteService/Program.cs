@@ -57,9 +57,9 @@ builder.Services
 
 			options.Url = config.GetConnectionString("Nats");
 		})
-		.AddProcessor<RouletteSignInProcessor>("tgs.roulette.daily", "tgs.roulette.daily")
-		.AddProcessor<RouletteQueryProcessor>("tgs.roulette.daily.query", "tgs.roulette.daily.query")
-		.AddProcessor<RouletteSettingProcessor>("tgs.promotion.roulette.setting", "tgs.promotion.roulette.setting"))
+	.AddProcessor<RouletteSignInProcessor>("tgs.roulette.daily", "tgs.roulette.daily")
+	.AddProcessor<RouletteQueryProcessor>("tgs.roulette.daily.query", "tgs.roulette.daily.query")
+	.AddProcessor<RouletteSettingProcessor>("tgs.promotion.roulette.setting", "tgs.promotion.roulette.setting"))
 	.AddNatsGlobPatternExchange("*");
 
 builder.Services
@@ -95,6 +95,10 @@ builder.Services
 				&& !httpContext.Request.Path.StartsWithSegments("/metrics")
 				&& !new[] { "html", "ico", "png", "jpg" }.Any(
 					ext => httpContext.Request.Path.Value.EndsWith($".{ext}")));
+
+builder.Services
+	.AddInterceptionService()
+	.AddServiceUtiltiyInterceptors();
 
 builder.Services
 	.AddHealthChecks();

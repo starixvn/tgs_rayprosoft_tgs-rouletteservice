@@ -14,8 +14,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Scrutor" Version="4.2.0" />
-    <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.6" />
-    <PackageReference Include="Tgs.Promotion.Client" Version="1.0.15" />
+    <PackageReference Include="Tgs.PlayerService.Client" Version="0.0.15" />
+    <PackageReference Include="Tgs.Promotion.Client" Version="1.0.19" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.1.0" />
   </ItemGroup>
 

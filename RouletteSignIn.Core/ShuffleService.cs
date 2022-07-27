@@ -8,9 +8,8 @@ internal class ShuffleService : IShuffleService
 	{
 		var proportions = items
 			.Select(item => Math.Floor(item.WinningProbability * 10000M))
-			.Where(n => n > 0M)
 			.ToArray();
-		var gcdResult = Gcd(proportions);
+		var gcdResult = Gcd(proportions.Where(n => n > 0M));
 
 		var minProportions = proportions
 			.Select(p => p / gcdResult)
